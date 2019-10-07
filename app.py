@@ -2,9 +2,11 @@
 from flask import Flask, render_template, request, redirect, url_for
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+import os
 
-client = MongoClient()
-db = client.RanchoStop
+host = os.environ.get('MONGODB_URI', 'mongodb://localhost:27017/RanchoStop')
+client = MongoClient(host=host)
+db = client.get_default_database()
 ranchos = db.ranchos
 
 app = Flask(__name__)
@@ -67,3 +69,7 @@ def ranchos_delete(rancho_id):
     """Delete one listing."""
     ranchos.delete_one({'_id': ObjectId(rancho_id)})
     return redirect(url_for('index'))
+
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=os.environ.get('PORT', 5000))
