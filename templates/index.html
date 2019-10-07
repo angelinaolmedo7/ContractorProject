@@ -3,10 +3,12 @@
 {% block body %}
     <h1>Welcome to RanchoStop</h1>
 
-    <a href='/ranchos/new'>New Listing</a>
+    <div class='row'>
+        <a href='/ranchos/new'>New Listing</a>
 
-    {% for rancho in ranchos %}
-        <h2><a href='/ranchos/{{ rancho._id }}'>{{ rancho.title }}</a></h2>
-        <small>{{ rancho.species }}</small>
-    {% endfor %}
+        {% for rancho in ranchos %}
+            <h2><a href='/ranchos/{{ rancho._id }}'>{{ rancho.title }}</a></h2>
+            <small>{{ rancho.species }}</small>
+        {% endfor %}
+    </div>
 {% endblock body %}
