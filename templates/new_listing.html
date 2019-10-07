@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<form method='POST' action='/ranchos'>
+    <fieldset>
+    <legend>New Listing</legend>
+    <!-- TITLE -->
+    <p>
+        <label for='title'>Title</label><br>
+        <input type='text' name='titles' />
+    </p>
+    <p>
+        <label for='species'>Species</label><br>
+        <input type='text' name='species' />
+    </p>
+    <p>
+        <label for='description'>Description</label><br>
+        <input type='text' name='description' />
+    </p>
+    </fieldset>
+
+    <!-- BUTTON -->
+    <p>
+        <button type='submit'>Save Listing</button>
+    </p>
+</form>
+{% endblock %}
