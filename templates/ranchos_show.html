@@ -18,9 +18,14 @@
         </p>
 
         <hr>
-        
+
     <!-- Comment form -->
     {% include 'partials/comment_form.html' %}
+
+    <!-- Show Comments -->
+    {% for comment in comments %}
+        {% include 'partials/comment.html' %}
+    {% endfor %}
 
     </div>
 </div>

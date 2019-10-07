@@ -8,6 +8,7 @@ host = os.environ.get('MONGODB_URI', 'mongodb://localhost:27019/RanchoStop')
 client = MongoClient(host=f'{host}?retryWrites=false')
 db = client.get_default_database()
 ranchos = db.ranchos
+comments = db.comments
 
 app = Flask(__name__)
 
@@ -39,7 +40,9 @@ def listing_submit():
 def ranchos_show(rancho_id):
     """Show a single listing."""
     rancho = ranchos.find_one({'_id': ObjectId(rancho_id)})
-    return render_template('ranchos_show.html', rancho=rancho)
+    listing_comments = comments.find({'rancho_id': ObjectId(rancho_id)})
+    return render_template('ranchos_show.html', rancho=rancho,
+                           comments=listing_comments)
 
 
 @app.route('/ranchos/<rancho_id>/edit')
@@ -69,6 +72,19 @@ def ranchos_delete(rancho_id):
     """Delete one listing."""
     ranchos.delete_one({'_id': ObjectId(rancho_id)})
     return redirect(url_for('index'))
+
+
+@app.route('/ranchos/comments', methods=['POST'])
+def comments_new():
+    """Submit a new comment."""
+    comment = {
+        'title': request.form.get('title'),
+        'content': request.form.get('content'),
+        'rancho_id': ObjectId(request.form.get('rancho_id'))
+    }
+    comment_id = comments.insert_one(comment).inserted_id
+    return redirect(url_for('ranchos_show',
+                            rancho_id=request.form.get('rancho_id')))
 
 
 if __name__ == '__main__':

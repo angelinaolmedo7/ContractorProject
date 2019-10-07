@@ -1,19 +1,20 @@
-<form>
+<form action='/ranchos/comments' method='post'>
+    <input type='hidden' value='{{ rancho._id }}' name='rancho_id'/>
     <fieldset>
         <legend>Add a Comment</legend>
         <!-- TITLE -->
         <div class='form-group'>
-            <label for='comment-title'>Title</label><br>
+            <label for='comment-title'>Subject</label><br>
             <input class='form-control'
                 id='comment-title'
                 type='text'
                 name='title'
-                placeholder='Title'/>
+                placeholder='Subject'/>
         </div>
 
         <!-- DESCRIPTION -->
         <div class='form-group'>
-            <label for='comment-content'>Description</label><br>
+            <label for='comment-content'>Message</label><br>
             <textarea class='form-control'
                 id='comment-content'
                 name='content'
