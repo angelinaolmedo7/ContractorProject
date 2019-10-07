@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
 {% block body %}
-    <h1>Ranchos</h1>
+    <h1>Welcome to RanchoStop</h1>
 
     <a href='/ranchos/new'>New Listing</a>
 
     {% for rancho in ranchos %}
-        <h2>{{ rancho.species }} | QTY: {{ rancho.stock }}</h2>
-        <small>{{ rancho.description }}</small>
+        <h2><a href='/ranchos/{{ rancho._id }}'>{{ rancho.title }}</a></h2>
+        <small>{{ rancho.species }}</small>
     {% endfor %}
 {% endblock body %}
