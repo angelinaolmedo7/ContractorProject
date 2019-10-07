@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<p>welcome 2 ranchostop</p>
+    <h1>Ranchos</h1>
+    {% for rancho in ranchos %}
+        <h2>{{ rancho.species }} | QTY: {{ rancho.stock }}</h2>
+        <small>{{ rancho.description }}</small>
+    {% endfor %}
 {% endblock body %}
