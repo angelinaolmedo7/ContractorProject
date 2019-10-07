@@ -87,5 +87,14 @@ def comments_new():
                             rancho_id=request.form.get('rancho_id')))
 
 
+@app.route('/ranchos/comments/<comment_id>', methods=['POST'])
+def comments_delete(comment_id):
+    """Delete a comment."""
+    comment = comments.find_one({'_id': ObjectId(comment_id)})
+    comments.delete_one({'_id': ObjectId(comment_id)})
+    return redirect(url_for('ranchos_show',
+                            rancho_id=comment.get('rancho_id')))
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=os.environ.get('PORT', 5000))
