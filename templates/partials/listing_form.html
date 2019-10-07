@@ -1,0 +1,22 @@
+<fieldset>
+<legend>{{ title }}</legend>
+<!-- TITLE -->
+    <p>
+        <label for='title'>Title</label><br>
+        <input type='text' name='title' />
+    </p>
+    <p>
+        <label for='species'>Species</label><br>
+        <input type='text' name='species' />
+    </p>
+    <p>
+        <label for='description'>Description</label><br>
+        <input type='text' name='description' />
+    </p>
+</fieldset>
+
+<!-- BUTTON -->
+<p>
+    <button type='submit'>Save Listing</button>
+    <a href='/ranchos/{{ rancho._id }}'>Cancel</a>
+</p>

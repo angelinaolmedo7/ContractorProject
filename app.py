@@ -17,9 +17,9 @@ def index():
 
 
 @app.route('/ranchos/new')
-def playlists_new():
+def ranchos_new():
     """Create a new listing."""
-    return render_template('new_listing.html')
+    return render_template('new_listing.html', rancho={}, title='New Listing')
 
 
 @app.route('/ranchos', methods=['POST'])
@@ -38,3 +38,32 @@ def ranchos_show(rancho_id):
     """Show a single listing."""
     rancho = ranchos.find_one({'_id': ObjectId(rancho_id)})
     return render_template('ranchos_show.html', rancho=rancho)
+
+
+@app.route('/ranchos/<rancho_id>/edit')
+def ranchos_edit(rancho_id):
+    """Show the edit form for a listing."""
+    rancho = ranchos.find_one({'_id': ObjectId(rancho_id)})
+    return render_template('ranchos_edit.html', rancho=rancho,
+                           title='Edit Listing')
+
+
+@app.route('/ranchos/<rancho_id>', methods=['POST'])
+def ranchos_update(rancho_id):
+    """Submit an edited listing."""
+    updated_listing = {
+        'title': request.form.get('title'),
+        'species': request.form.get('species'),
+        'description': request.form.get('description')
+    }
+    ranchos.update_one(
+        {'_id': ObjectId(rancho_id)},
+        {'$set': updated_listing})
+    return redirect(url_for('ranchos_show', rancho_id=rancho_id))
+
+
+@app.route('/ranchos/<rancho_id>/delete', methods=['POST'])
+def ranchos_delete(rancho_id):
+    """Delete one listing."""
+    ranchos.delete_one({'_id': ObjectId(rancho_id)})
+    return redirect(url_for('index'))

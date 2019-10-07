@@ -8,4 +8,10 @@
     <h2>{{ rancho.species }}</h2>
     <p>{{ rancho.description }}</p>
 
+    <p><a href='/ranchos/{{ rancho._id }}/edit'>Edit</a></p>
+    <!-- Delete button -->
+    <p><form method='POST' action='/ranchos/{{ rancho._id }}/delete'>
+        <button type='submit'>Delete</button>
+    </form></p>
+
 {% endblock %}
