@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<a href='/'>Back to Home</a>
+<div class='row'>
+    <div class='col-sm-6 col-sm-offset-3'>
+        <h1>{{ listing.title }}</h1>
+        {% if listing.created_at %}
+        <p class='text-muted'>Created on {{ listing.created_at.strftime('%A, %d %B, %Y') }}
+            at {{ listing.created_at.strftime('%I:%M %p') }}</p>
+        {% endif %}
+        <p>{{ listing.description }}</p>
+
+        <p><a href='/listings/{{ listing._id }}/edit'>Edit</a></p>
+        <!-- Delete button -->
+        <p>
+            <form method='POST' action='/listings/{{ listing._id }}/delete'>
+                <button type='submit'>Delete</button>
+            </form>
+        </p>
+
+        <hr>
+
+    <!-- Comment form -->
+    {% include 'partials/comment_form.html' %}
+
+    <!-- Show Comments -->
+    {% for comment in comments %}
+        {% include 'partials/comment.html' %}
+    {% endfor %}
+
+    </div>
+</div>
+
+{% endblock %}

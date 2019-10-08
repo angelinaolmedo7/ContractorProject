@@ -8,34 +8,59 @@ from datetime import datetime
 host = os.environ.get('MONGODB_URI', 'mongodb://localhost:27019/RanchoStop')
 client = MongoClient(host=f'{host}?retryWrites=false')
 db = client.get_default_database()
+users = db.users
 ranchos = db.ranchos
+listings = db.listings
 comments = db.comments
 
 app = Flask(__name__)
 
 
 @app.route('/')
-def index():
-    """Return homepage."""
-    return render_template('index.html', ranchos=ranchos.find())
+def home():
+    """Return listings homepage."""
+    return render_template('listings_index.html', listings=listings.find())
 
 
-@app.route('/ranchos/new')
-def ranchos_new():
+@app.route('/listings_home')
+def listings_home():
+    """Return listings homepage."""
+    return render_template('listings_index.html', listings=listings.find())
+
+
+@app.route('/listings/new')
+def listings_new():
     """Create a new listing."""
-    return render_template('new_listing.html', rancho={}, title='New Listing')
+    return render_template('new_listing.html', listing={}, title='New Listing')
 
 
-@app.route('/ranchos', methods=['POST'])
+@app.route('/listings', methods=['POST'])
 def listing_submit():
     """Submit a new listing."""
     listing = {'title': request.form.get('title'),
-               'species': request.form.get('species'),
                'description': request.form.get('description'),
+               'views': 0,
                'created_at': datetime.now()
                }
-    ranchos.insert_one(listing)
-    return redirect(url_for('index'))
+    listing_id = listings.insert_one(listing).inserted_id
+    return redirect(url_for('listings_show', listing_id=listing_id))
+
+
+@app.route('/listings/<listing_id>')
+def listings_show(listing_id):
+    """Show a single listing."""
+    listing = listings.find_one({'_id': ObjectId(listing_id)})
+    listing_comments = comments.find({'listing_id': ObjectId(listing_id)})
+
+    updated_views = {
+        'views': listing['views'] + 1
+    }
+    listings.update_one(
+        {'_id': ObjectId(listing_id)},
+        {'$set': updated_views})
+
+    return render_template('listings_show.html', listing=listing,
+                           comments=listing_comments)
 
 
 @app.route('/ranchos/<rancho_id>')
@@ -47,55 +72,83 @@ def ranchos_show(rancho_id):
                            comments=listing_comments)
 
 
+@app.route('/listings/<listing_id>/edit')
+def listings_edit(listing_id):
+    """Show the edit form for a listing."""
+    listing = listings.find_one({'_id': ObjectId(listing_id)})
+    return render_template('listings_edit.html', listing=listing,
+                           title='Edit Listing')
+
+
+@app.route('/listings/<listing_id>', methods=['POST'])
+def listings_update(listing_id):
+    """Submit an edited listing."""
+    updated_listing = {
+        'title': request.form.get('title'),
+        'description': request.form.get('description')
+    }
+    listings.update_one(
+        {'_id': ObjectId(listing_id)},
+        {'$set': updated_listing})
+    return redirect(url_for('ranchos_show', listing_id=listing_id))
+
+
 @app.route('/ranchos/<rancho_id>/edit')
 def ranchos_edit(rancho_id):
-    """Show the edit form for a listing."""
+    """Show the edit form for a Rancho profile."""
     rancho = ranchos.find_one({'_id': ObjectId(rancho_id)})
     return render_template('ranchos_edit.html', rancho=rancho,
-                           title='Edit Listing')
+                           title='Edit Rancho Profile')
 
 
 @app.route('/ranchos/<rancho_id>', methods=['POST'])
 def ranchos_update(rancho_id):
-    """Submit an edited listing."""
-    updated_listing = {
+    """Submit an edited rancho profile."""
+    updated_prof = {
         'title': request.form.get('title'),
         'species': request.form.get('species'),
         'description': request.form.get('description')
     }
     ranchos.update_one(
         {'_id': ObjectId(rancho_id)},
-        {'$set': updated_listing})
+        {'$set': updated_prof})
     return redirect(url_for('ranchos_show', rancho_id=rancho_id))
 
 
-@app.route('/ranchos/<rancho_id>/delete', methods=['POST'])
-def ranchos_delete(rancho_id):
+@app.route('/listings/<listing_id>/delete', methods=['POST'])
+def listings_delete(listing_id):
     """Delete one listing."""
+    listings.delete_one({'_id': ObjectId(listing_id)})
+    return redirect(url_for('listings_home'))
+
+
+@app.route('/ranchos/<rancho_id>/release', methods=['POST'])
+def ranchos_delete(rancho_id):
+    """Release (delete) one Rancho."""
     ranchos.delete_one({'_id': ObjectId(rancho_id)})
-    return redirect(url_for('index'))
+    return redirect(url_for('listings_home'))
 
 
-@app.route('/ranchos/comments', methods=['POST'])
+@app.route('/listings/comments', methods=['POST'])
 def comments_new():
     """Submit a new comment."""
     comment = {
         'title': request.form.get('title'),
         'content': request.form.get('content'),
-        'rancho_id': ObjectId(request.form.get('rancho_id'))
+        'listing_id': ObjectId(request.form.get('listing_id'))
     }
-    comment_id = comments.insert_one(comment).inserted_id
-    return redirect(url_for('ranchos_show',
-                            rancho_id=request.form.get('rancho_id')))
+    comments.insert_one(comment)
+    return redirect(url_for('listings_show',
+                            listing_id=request.form.get('listing_id')))
 
 
-@app.route('/ranchos/comments/<comment_id>', methods=['POST'])
+@app.route('/listings/comments/<comment_id>', methods=['POST'])
 def comments_delete(comment_id):
     """Delete a comment."""
     comment = comments.find_one({'_id': ObjectId(comment_id)})
     comments.delete_one({'_id': ObjectId(comment_id)})
-    return redirect(url_for('ranchos_show',
-                            rancho_id=comment.get('rancho_id')))
+    return redirect(url_for('listings_show',
+                            listing_id=comment.get('listing_id')))
 
 
 if __name__ == '__main__':

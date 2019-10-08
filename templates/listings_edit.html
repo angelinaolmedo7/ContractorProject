@@ -3,12 +3,13 @@
 {% block body %}
 <div class='row'>
     <div class='col-sm-6 col-sm-offset-3'>
-        <form method='POST' action='/listings'>
+        <form method='POST' action='/listings/{{listing._id}}'>
+            <input type='hidden' name='_method' value='PUT'/>
             {% include 'partials/listing_form.html' %}
             <!-- BUTTON -->
             <div class='form-group'>
                 <button class='btn btn-primary' type='submit'>Save Listing</button>
-                <a href='/listings_home'>Cancel</a>
+                <a href='/listings/{{ listing._id }}'>Cancel</a>
             </div>
         </form>
     </div>

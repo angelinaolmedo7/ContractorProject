@@ -3,7 +3,7 @@
         <h4 class='card-title'>{{ comment.title }}</h4>
         <p class='card-text'>{{ comment.content }}</p>
         <!-- Delete link -->
-        <p><form method='POST' action='/ranchos/comments/{{ comment._id }}'>
+        <p><form method='POST' action='/listings/comments/{{ comment._id }}'>
             <button class='btn btn-link' type='submit'>Delete</button>
         </form></p>
     </div>

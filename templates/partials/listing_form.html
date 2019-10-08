@@ -4,25 +4,13 @@
     <!-- TITLE -->
     <div class='form-group'>
         <label for='title'>Listing Title</label><br>
-        <input class='form-control' id='title' type='text' name='title' value='{{ rancho.title }}'/>
-    </div>
-
-    <!-- SPECIES -->
-    <div class='form-group'>
-        <label for='description'>Species</label><br>
-        <input class='form-control' id='species' type='text' name='species' value='{{ rancho.species }}' />
+        <input class='form-control' id='title' type='text' name='title' value='{{ listing.title }}'/>
     </div>
 
     <!-- DESCRIPTION -->
     <div class='form-group'>
         <label for='description'>Description</label><br>
-        <input class='form-control' id='description' type='text' name='description' value='{{ rancho.description }}'/>
+        <input class='form-control' id='description' type='text' name='description' value='{{ listing.description }}'/>
     </div>
 
 </fieldset>
-
-<!-- BUTTON -->
-<p>
-    <button type='submit'>Save Listing</button>
-    <a href='/ranchos/{{ rancho._id }}'>Cancel</a>
-</p>
