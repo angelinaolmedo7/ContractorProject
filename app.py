@@ -153,6 +153,15 @@ def listings_edit(listing_id):
 @app.route('/listings/<listing_id>', methods=['POST'])
 def listings_update(listing_id):
     """Submit an edited listing."""
+    # log in
+    listing = listings.find_one({'_id': ObjectId(listing_id)})
+    if listing['author'] != request.form.get('username'):
+        return render_template('go_back.html')
+    user = users.find_one({'username': request.form.get('username')})
+    if user is None:
+        return render_template('go_back.html')
+    if user['password'] != request.form.get('password'):
+        return render_template('go_back.html')
     updated_listing = {
         'title': request.form.get('title'),
         'description': request.form.get('description')
