@@ -90,7 +90,7 @@ def listings_update(listing_id):
     listings.update_one(
         {'_id': ObjectId(listing_id)},
         {'$set': updated_listing})
-    return redirect(url_for('ranchos_show', listing_id=listing_id))
+    return redirect(url_for('listings_show', listing_id=listing_id))
 
 
 @app.route('/ranchos/<rancho_id>/edit')
