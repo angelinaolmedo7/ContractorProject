@@ -2,13 +2,31 @@
 
 {% block body %}
     <h1>Welcome to RanchoStop</h1>
+    <a href='/ranchos/new'>New Listing</a>
 
-    <div class='row'>
-        <a href='/ranchos/new'>New Listing</a>
-
-        {% for rancho in ranchos %}
-            <h2><a href='/ranchos/{{ rancho._id }}'>{{ rancho.title }}</a></h2>
-            <small>{{ rancho.species }}</small>
-        {% endfor %}
-    </div>
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th scope="col">Author</th>
+          <th scope="col">Subject</th>
+          <th scope="col">Views</th>
+          <th scope="col">Time Created</th>
+        </tr>
+      </thead>
+      <tbody>
+          {% for rancho in ranchos %}
+            <tr class="table-light">
+              <td>You</td>
+              <th scope="row"><a href='/ranchos/{{ rancho._id }}'>{{ rancho.title }}</a></th>
+              <td>0</td>
+              {% if rancho.created_at %}
+                <td>
+                    {{ rancho.created_at.strftime('%I:%M%p') }}
+                    {{ rancho.created_at.strftime('%d/%m/%y') }}
+                </td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+      </tbody>
+    </table>
 {% endblock body %}

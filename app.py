@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import os
+from datetime import datetime
 
 host = os.environ.get('MONGODB_URI', 'mongodb://localhost:27019/RanchoStop')
 client = MongoClient(host=f'{host}?retryWrites=false')
@@ -30,7 +31,8 @@ def listing_submit():
     """Submit a new listing."""
     listing = {'title': request.form.get('title'),
                'species': request.form.get('species'),
-               'description': request.form.get('description')
+               'description': request.form.get('description'),
+               'created_at': datetime.now()
                }
     ranchos.insert_one(listing)
     return redirect(url_for('index'))

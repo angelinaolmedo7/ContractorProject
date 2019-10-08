@@ -6,6 +6,10 @@
 <div class='row'>
     <div class='col-sm-6 col-sm-offset-3'>
         <h1>{{ rancho.title }}</h1>
+        {% if rancho.created_at %}
+        <p class='text-muted'>Created on {{ rancho.created_at.strftime('%A, %d %B, %Y') }}
+            at {{ rancho.created_at.strftime('%I:%M %p') }}</p>
+        {% endif %}
         <h2>{{ rancho.species }}</h2>
         <p>{{ rancho.description }}</p>
 
