@@ -98,10 +98,18 @@ def listings_new():
 @app.route('/listings', methods=['POST'])
 def listing_submit():
     """Submit a new listing."""
+    # log in
+    user = users.find_one({'username': request.form.get('username')})
+    if user is None:
+        return render_template('go_back.html')
+    if user['password'] != request.form.get('password'):
+        return render_template('go_back.html')
     listing = {'title': request.form.get('title'),
                'description': request.form.get('description'),
                'views': 0,
-               'created_at': datetime.now()
+               'created_at': datetime.now(),
+               'author': request.form.get('username'),
+               'user_id': user['_id']
                }
     listing_id = listings.insert_one(listing).inserted_id
     return redirect(url_for('listings_show', listing_id=listing_id))
@@ -112,6 +120,7 @@ def listings_show(listing_id):
     """Show a single listing."""
     listing = listings.find_one({'_id': ObjectId(listing_id)})
     listing_comments = comments.find({'listing_id': ObjectId(listing_id)})
+    listing_author = users.find({'_id': listing['user_id']})
 
     updated_views = {
         'views': listing['views'] + 1
@@ -121,7 +130,7 @@ def listings_show(listing_id):
         {'$set': updated_views})
 
     return render_template('listings_show.html', listing=listing,
-                           comments=listing_comments)
+                           comments=listing_comments, user=listing_author)
 
 
 @app.route('/ranchos/<rancho_id>')

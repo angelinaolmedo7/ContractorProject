@@ -16,7 +16,15 @@
       <tbody>
           {% for listing in listings %}
             <tr class="table-light">
-              <td>You</td>
+                {% if listing.author %}
+                  <td>
+                      {{ listing.author }}
+                  </td>
+                {% else %}
+                    <td>
+                        Anonymous
+                    </td>
+                {% endif %}
               <th scope="row"><a href='/listings/{{ listing._id }}'>{{ listing.title }}</a></th>
               {% if listing.views %}
                 <td>
@@ -29,7 +37,7 @@
               {% endif %}
               {% if listing.created_at %}
                 <td>
-                    {{ listing.created_at.strftime('%I:%M%p') }}
+                    {{ listing.created_at.strftime('%I:%M %p') }}
                     {{ listing.created_at.strftime('%d/%m/%y') }}
                 </td>
               {% endif %}

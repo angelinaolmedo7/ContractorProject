@@ -27,7 +27,7 @@
               {% endif %}
               {% if user.created_at %}
                 <td>
-                    {{ user.created_at.strftime('%I:%M%p') }}
+                    {{ user.created_at.strftime('%I:%M %p') }}
                     {{ user.created_at.strftime('%d/%m/%y') }}
                 </td>
               {% endif %}

@@ -7,7 +7,7 @@
     <div class='col-sm-6 col-sm-offset-3'>
         <h1>{{ listing.title }}</h1>
         {% if listing.created_at %}
-        <p class='text-muted'>Created on {{ listing.created_at.strftime('%A, %d %B, %Y') }}
+        <p class='text-muted'>Created by <a href='/users/{{ listing.user_id }}'>{{ listing.author }}</a> on {{ listing.created_at.strftime('%A, %d %B, %Y') }}
             at {{ listing.created_at.strftime('%I:%M %p') }}</p>
         {% endif %}
         <p>{{ listing.description }}</p>
