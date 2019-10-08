@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class='row'>
+    <div class='col-sm-6 col-sm-offset-3'>
+        <form method='POST' action='/users/{{user._id}}'>
+            <input type='hidden' name='_method' value='PUT'/>
+            <fieldset>
+
+                <legend>Edit {{user.username}}'s Profile</legend>
+                <!-- BIO -->
+                <div class='form-group'>
+                    <label for='bio-content'>Bio</label><br>
+                    <textarea class='form-control'
+                        id='bio-content'
+                        name='content'
+                        rows='10'>{{ user.bio }}</textarea>
+                </div>
+
+            </fieldset>
+
+            <!-- BUTTON -->
+            <div class='form-group'>
+                <button class='btn btn-primary' type='submit'>Save Profile</button>
+                <a href='/users/{{ user._id }}'>Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

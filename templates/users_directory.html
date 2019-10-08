@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block body %}
+    <h1>Welcome to RanchoStop User Directory</h1>
+    <a href='/users/new'>New User</a>
+
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th scope="col">Username</th>
+          <th scope="col">Ranchos</th>
+          <th scope="col">Joined</th>
+        </tr>
+      </thead>
+      <tbody>
+          {% for user in users %}
+            <tr class="table-light">
+              <th scope="row"><a href='/users/{{ user._id }}'>{{ user.username }}</a></th>
+              {% if user.ranchos %}
+                <td>
+                    {{ user.ranchos }}
+                </td>
+              {% else %}
+                  <td>
+                      0
+                  </td>
+              {% endif %}
+              {% if user.created_at %}
+                <td>
+                    {{ user.created_at.strftime('%I:%M%p') }}
+                    {{ user.created_at.strftime('%d/%m/%y') }}
+                </td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+      </tbody>
+    </table>
+{% endblock body %}

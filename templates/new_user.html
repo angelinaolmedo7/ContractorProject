@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class='row'>
+    <div class='col-sm-6 col-sm-offset-3'>
+        <form method='POST' action='/users'>
+            <fieldset>
+
+                <legend>{{ title }}</legend>
+                <!-- USERNAME -->
+                <div class='form-group'>
+                    <label for='title'>Username</label><br>
+                    <input class='form-control' id='username' type='text' name='username'/>
+                </div>
+
+                <!-- PASSWORD -->
+                <div class='form-group'>
+                    <label for='description'>Password</label><br>
+                    <div class="alert alert-dismissible alert-danger">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>WARNING!</strong> This site is NOT SECURE. Do NOT use a password that you have used or will use for any other site.
+                    </div>
+                    <input class='form-control' id='password' type='text' name='password'/>
+                </div>
+                <!-- BIO -->
+                <div class='form-group'>
+                    <label for='bio-content'>Bio</label><br>
+                    <textarea class='form-control'
+                        id='bio-content'
+                        name='content'
+                        rows='10'
+                        placeholder='Your public bio...'></textarea>
+                </div>
+
+            </fieldset>
+            <!-- BUTTON -->
+            <div class='form-group'>
+                <button class='btn btn-primary' type='submit'>Save User</button>
+                <a href='/users/directory'>Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

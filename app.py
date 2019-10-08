@@ -22,6 +22,67 @@ def home():
     return render_template('listings_index.html', listings=listings.find())
 
 
+# ---------------------------USERS---------------------------
+@app.route('/users/new')
+def users_new():
+    """Return a user creation page with starter Ranchos."""
+    return render_template('new_user.html', user={}, title='New User')
+
+
+@app.route('/users/directory')
+def users_directory():
+    """Return a directory of users."""
+    return render_template('users_directory.html', users=users.find())
+
+
+@app.route('/users', methods=['POST'])
+def users_submit():
+    """Submit a new user."""
+    user = {'username': request.form.get('username'),
+            'password': request.form.get('password'),
+            'bio': request.form.get('content'),
+            'created_at': datetime.now()
+            }
+    user_id = users.insert_one(user).inserted_id
+    return redirect(url_for('users_show', user_id=user_id))
+
+
+@app.route('/users/<user_id>/edit')
+def users_edit(user_id):
+    """Show the edit form for a user profile."""
+    user = users.find_one({'_id': ObjectId(user_id)})
+    return render_template('users_edit.html', user=user,
+                           title='Edit User Profile')
+
+
+@app.route('/users/<user_id>', methods=['POST'])
+def users_update(user_id):
+    """Submit an edited listing."""
+    updated_user = {
+        'bio': request.form.get('content')
+    }
+    users.update_one(
+        {'_id': ObjectId(user_id)},
+        {'$set': updated_user})
+    return redirect(url_for('users_show', user_id=user_id))
+
+
+@app.route('/users/<user_id>')
+def users_show(user_id):
+    """Show a single user page."""
+    user = users.find_one({'_id': ObjectId(user_id)})
+    user_ranchos = ranchos.find({'user_id': ObjectId(user_id)})
+    return render_template('users_show.html', user=user,
+                           ranchos=user_ranchos)
+
+
+@app.route('/users/<user_id>/delete', methods=['POST'])
+def users_delete(user_id):
+    """Delete one user."""
+    users.delete_one({'_id': ObjectId(user_id)})
+    return redirect(url_for('users_directory'))
+
+
 @app.route('/listings_home')
 def listings_home():
     """Return listings homepage."""
@@ -65,7 +126,7 @@ def listings_show(listing_id):
 
 @app.route('/ranchos/<rancho_id>')
 def ranchos_show(rancho_id):
-    """Show a single listing."""
+    """Show a single Rancho."""
     rancho = ranchos.find_one({'_id': ObjectId(rancho_id)})
     listing_comments = comments.find({'rancho_id': ObjectId(rancho_id)})
     return render_template('ranchos_show.html', rancho=rancho,
