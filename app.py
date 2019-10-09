@@ -24,19 +24,28 @@ Session(app)
 @app.route('/')
 def home():
     """Return listings homepage."""
-    return render_template('home.html', user=session['user'])
+    current_user = None
+    if 'user' in session:
+        current_user = session['user']
+    return render_template('home.html', current_user=current_user)
 
 
-# ---------------------------LOGIN---------------------------
+# ---------------------------LOGIN/OUT---------------------------
 @app.route('/login')
 def login():
     """Login from."""
+    if 'user' in session:
+        username = session['user']['username']
+        return f'Logged in as {username}.'
     return render_template('login.html')
 
 
 @app.route('/login/submit', methods=['POST'])
 def login_submit():
     """Login submit."""
+    current_user = None
+    if 'user' in session:
+        current_user = session['user']
     user = users.find_one({'username': request.form.get('username')})
     print(user['username'])
     if user is None:
@@ -44,7 +53,14 @@ def login_submit():
     if user['password'] != request.form.get('password'):
         return redirect(url_for('login'))
     session['user'] = user
-    return redirect(url_for('home', user=session['user']))
+    return redirect(url_for('home', current_user=current_user))
+
+
+@app.route('/logout')
+def logout():
+    """Remove user from session."""
+    session.pop('user', None)
+    return redirect(url_for('home'))
 
 
 # ---------------------------USERS---------------------------
@@ -57,7 +73,11 @@ def users_new():
 @app.route('/users/directory')
 def users_directory():
     """Return a directory of users."""
-    return render_template('users_directory.html', users=users.find())
+    current_user = None
+    if 'user' in session:
+        current_user = session['user']
+    return render_template('users_directory.html', users=users.find(),
+                           current_user=current_user)
 
 
 @app.route('/users', methods=['POST'])
@@ -75,9 +95,13 @@ def users_submit():
 @app.route('/users/<user_id>/edit')
 def users_edit(user_id):
     """Show the edit form for a user profile."""
+    current_user = None
+    if 'user' in session:
+        current_user = session['user']
     user = users.find_one({'_id': ObjectId(user_id)})
     return render_template('users_edit.html', user=user,
-                           title='Edit User Profile')
+                           title='Edit User Profile',
+                           current_user=current_user)
 
 
 @app.route('/users/<user_id>', methods=['POST'])
@@ -95,10 +119,14 @@ def users_update(user_id):
 @app.route('/users/<user_id>')
 def users_show(user_id):
     """Show a single user page."""
+    current_user = None
+    if 'user' in session:
+        current_user = session['user']
     user = users.find_one({'_id': ObjectId(user_id)})
     user_ranchos = ranchos.find({'user_id': ObjectId(user_id)})
     return render_template('users_show.html', user=user,
-                           ranchos=user_ranchos)
+                           ranchos=user_ranchos,
+                           current_user=current_user)
 
 
 @app.route('/users/<user_id>/delete', methods=['POST'])
@@ -111,13 +139,21 @@ def users_delete(user_id):
 @app.route('/listings_home')
 def listings_home():
     """Return listings homepage."""
-    return render_template('listings_index.html', listings=listings.find())
+    current_user = None
+    if 'user' in session:
+        current_user = session['user']
+    return render_template('listings_index.html', listings=listings.find(),
+                           current_user=current_user)
 
 
 @app.route('/listings/new')
 def listings_new():
     """Create a new listing."""
-    return render_template('new_listing.html', listing={}, title='New Listing')
+    current_user = None
+    if 'user' in session:
+        current_user = session['user']
+    return render_template('new_listing.html', listing={}, title='New Listing',
+                           current_user=current_user)
 
 
 @app.route('/listings', methods=['POST'])
@@ -143,6 +179,10 @@ def listing_submit():
 @app.route('/listings/<listing_id>')
 def listings_show(listing_id):
     """Show a single listing."""
+    current_user = None
+    if 'user' in session:
+        current_user = session['user']
+
     listing = listings.find_one({'_id': ObjectId(listing_id)})
     listing_comments = comments.find({'listing_id': ObjectId(listing_id)})
     listing_author = users.find({'_id': listing['user_id']})
@@ -155,24 +195,32 @@ def listings_show(listing_id):
         {'$set': updated_views})
 
     return render_template('listings_show.html', listing=listing,
-                           comments=listing_comments, user=listing_author)
+                           comments=listing_comments, user=listing_author,
+                           current_user=current_user)
 
 
 @app.route('/ranchos/<rancho_id>')
 def ranchos_show(rancho_id):
     """Show a single Rancho."""
+    current_user = None
+    if 'user' in session:
+        current_user = session['user']
     rancho = ranchos.find_one({'_id': ObjectId(rancho_id)})
     listing_comments = comments.find({'rancho_id': ObjectId(rancho_id)})
     return render_template('ranchos_show.html', rancho=rancho,
-                           comments=listing_comments)
+                           comments=listing_comments,
+                           current_user=current_user)
 
 
 @app.route('/listings/<listing_id>/edit')
 def listings_edit(listing_id):
     """Show the edit form for a listing."""
+    current_user = None
+    if 'user' in session:
+        current_user = session['user']
     listing = listings.find_one({'_id': ObjectId(listing_id)})
     return render_template('listings_edit.html', listing=listing,
-                           title='Edit Listing')
+                           title='Edit Listing', current_user=current_user)
 
 
 @app.route('/listings/<listing_id>', methods=['POST'])
@@ -199,9 +247,13 @@ def listings_update(listing_id):
 @app.route('/ranchos/<rancho_id>/edit')
 def ranchos_edit(rancho_id):
     """Show the edit form for a Rancho profile."""
+    current_user = None
+    if 'user' in session:
+        current_user = session['user']
     rancho = ranchos.find_one({'_id': ObjectId(rancho_id)})
     return render_template('ranchos_edit.html', rancho=rancho,
-                           title='Edit Rancho Profile')
+                           title='Edit Rancho Profile',
+                           current_user=current_user)
 
 
 @app.route('/ranchos/<rancho_id>', methods=['POST'])
