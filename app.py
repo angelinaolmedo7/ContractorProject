@@ -153,6 +153,7 @@ def users_delete(user_id):
     return redirect(url_for('users_directory'))
 
 
+# ---------------------------LISTINGS---------------------------
 @app.route('/listings_home')
 def listings_home():
     """Return listings homepage."""
@@ -167,28 +168,22 @@ def listings_home():
 @login_required
 def listings_new():
     """Create a new listing."""
-    current_user = None
-    if 'user' in session:
-        current_user = session['user']
+    current_user = session['user']
     return render_template('new_listing.html', listing={}, title='New Listing',
                            current_user=current_user)
 
 
 @app.route('/listings', methods=['POST'])
+@login_required
 def listing_submit():
     """Submit a new listing."""
-    # log in
-    user = users.find_one({'username': request.form.get('username')})
-    if user is None:
-        return render_template('go_back.html')
-    if user['password'] != request.form.get('password'):
-        return render_template('go_back.html')
+    current_user = session['user']
     listing = {'title': request.form.get('title'),
                'description': request.form.get('description'),
                'views': 0,
                'created_at': datetime.now(),
-               'author': request.form.get('username'),
-               'user_id': user['_id']
+               'author': current_user['username'],
+               'user_id': current_user['_id']
                }
     listing_id = listings.insert_one(listing).inserted_id
     return redirect(url_for('listings_show', listing_id=listing_id))
@@ -217,6 +212,52 @@ def listings_show(listing_id):
                            current_user=current_user)
 
 
+@app.route('/listings/<listing_id>/edit')
+@login_required
+def listings_edit(listing_id):
+    """Show the edit form for a listing."""
+    current_user = session['user']
+    listing = listings.find_one({'_id': ObjectId(listing_id)})
+    if (current_user['_id'] != listing['user_id']):
+        return render_template('go_back.html')
+    return render_template('listings_edit.html', listing=listing,
+                           title='Edit Listing', current_user=current_user)
+
+
+@app.route('/listings/<listing_id>', methods=['POST'])
+@login_required
+def listings_update(listing_id):
+    """Submit an edited listing."""
+    current_user = session['user']
+    listing = listings.find_one({'_id': ObjectId(listing_id)})
+    if (current_user['_id'] != listing['user_id']):
+        return render_template('go_back.html')
+
+    updated_listing = {
+        'title': request.form.get('title'),
+        'description': request.form.get('description')
+    }
+    listings.update_one(
+        {'_id': ObjectId(listing_id)},
+        {'$set': updated_listing})
+    return redirect(url_for('listings_show', listing_id=listing_id))
+
+
+@app.route('/listings/<listing_id>/delete', methods=['POST'])
+@login_required
+def listings_delete(listing_id):
+    """Delete one listing."""
+    # log in
+    current_user = session['user']
+    listing = listings.find_one({'_id': ObjectId(listing_id)})
+    if (current_user['_id'] != listing['user_id']):
+        return render_template('go_back.html')
+
+    listings.delete_one({'_id': ObjectId(listing_id)})
+    return redirect(url_for('listings_home'))
+
+
+# ---------------------------RANCHOS---------------------------
 @app.route('/ranchos/<rancho_id>')
 def ranchos_show(rancho_id):
     """Show a single Rancho."""
@@ -228,38 +269,6 @@ def ranchos_show(rancho_id):
     return render_template('ranchos_show.html', rancho=rancho,
                            comments=listing_comments,
                            current_user=current_user)
-
-
-@app.route('/listings/<listing_id>/edit')
-def listings_edit(listing_id):
-    """Show the edit form for a listing."""
-    current_user = None
-    if 'user' in session:
-        current_user = session['user']
-    listing = listings.find_one({'_id': ObjectId(listing_id)})
-    return render_template('listings_edit.html', listing=listing,
-                           title='Edit Listing', current_user=current_user)
-
-
-@app.route('/listings/<listing_id>', methods=['POST'])
-def listings_update(listing_id):
-    """Submit an edited listing."""
-    # log in
-    listing = listings.find_one({'_id': ObjectId(listing_id)})
-    user = users.find_one({'_id': ObjectId(listing['user_id'])})
-    if user is None:
-        return render_template('go_back.html')
-    if user['password'] != request.form.get('password'):
-        return render_template('go_back.html')
-
-    updated_listing = {
-        'title': request.form.get('title'),
-        'description': request.form.get('description')
-    }
-    listings.update_one(
-        {'_id': ObjectId(listing_id)},
-        {'$set': updated_listing})
-    return redirect(url_for('listings_show', listing_id=listing_id))
 
 
 @app.route('/ranchos/<rancho_id>/edit')
@@ -288,21 +297,6 @@ def ranchos_update(rancho_id):
     return redirect(url_for('ranchos_show', rancho_id=rancho_id))
 
 
-@app.route('/listings/<listing_id>/delete', methods=['POST'])
-def listings_delete(listing_id):
-    """Delete one listing."""
-    # log in
-    listing = listings.find_one({'_id': ObjectId(listing_id)})
-    user = users.find_one({'_id': ObjectId(listing['user_id'])})
-    if user is None:
-        return render_template('go_back.html')
-    if user['password'] != request.form.get('password'):
-        return render_template('go_back.html')
-
-    listings.delete_one({'_id': ObjectId(listing_id)})
-    return redirect(url_for('listings_home'))
-
-
 @app.route('/ranchos/<rancho_id>/release', methods=['POST'])
 def ranchos_delete(rancho_id):
     """Release (delete) one Rancho."""
@@ -310,6 +304,7 @@ def ranchos_delete(rancho_id):
     return redirect(url_for('listings_home'))
 
 
+# ---------------------------COMMENTS---------------------------
 @app.route('/listings/comments', methods=['POST'])
 def comments_new():
     """Submit a new comment."""

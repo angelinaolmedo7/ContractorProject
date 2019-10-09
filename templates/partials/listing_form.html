@@ -10,11 +10,13 @@
 
     <!-- DESCRIPTION -->
     <div class='form-group'>
-        <label for='description'>Description</label><br>
-        <input class='form-control' id='description' type='text' name='description' value='{{ listing.description }}'/>
+        <label for='description'>Bio</label><br>
+        <textarea class='form-control'
+            id='description'
+            name='description'
+            rows='10'
+            placeholder='Your public listing...'>{{ listing.description }}</textarea>
     </div>
-
-    <br>
 
 
 </fieldset>
