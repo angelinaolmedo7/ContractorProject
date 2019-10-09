@@ -35,8 +35,8 @@ def home():
 def login():
     """Login from."""
     if 'user' in session:
-        username = session['user']['username']
-        return f'Logged in as {username}.'
+        current_user = session['user']
+        return render_template('logged_in.html', current_user=current_user)
     return render_template('login.html')
 
 
