@@ -247,7 +247,6 @@ def listings_update(listing_id):
 @login_required
 def listings_delete(listing_id):
     """Delete one listing."""
-    # log in
     current_user = session['user']
     listing = listings.find_one({'_id': ObjectId(listing_id)})
     if (current_user['_id'] != listing['user_id']):
@@ -306,12 +305,16 @@ def ranchos_delete(rancho_id):
 
 # ---------------------------COMMENTS---------------------------
 @app.route('/listings/comments', methods=['POST'])
+@login_required
 def comments_new():
     """Submit a new comment."""
+    current_user = session['user']
     comment = {
         'title': request.form.get('title'),
         'content': request.form.get('content'),
-        'listing_id': ObjectId(request.form.get('listing_id'))
+        'listing_id': ObjectId(request.form.get('listing_id')),
+        'author': current_user['username'],
+        'user_id': current_user['_id']
     }
     comments.insert_one(comment)
     return redirect(url_for('listings_show',
@@ -319,9 +322,14 @@ def comments_new():
 
 
 @app.route('/listings/comments/<comment_id>', methods=['POST'])
+@login_required
 def comments_delete(comment_id):
     """Delete a comment."""
+    current_user = session['user']
     comment = comments.find_one({'_id': ObjectId(comment_id)})
+    if (current_user['_id'] != comment['user_id']):
+        return render_template('go_back.html')
+
     comments.delete_one({'_id': ObjectId(comment_id)})
     return redirect(url_for('listings_show',
                             listing_id=comment.get('listing_id')))
