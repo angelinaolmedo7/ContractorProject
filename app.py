@@ -84,6 +84,9 @@ def logout():
 @app.route('/users/new')
 def users_new():
     """Return a user creation page with starter Ranchos."""
+    if 'user' in session:
+        current_user = session['user']
+        return render_template('logged_in.html', current_user=current_user)
     return render_template('new_user.html', user={}, title='New User')
 
 
@@ -100,6 +103,9 @@ def users_directory():
 @app.route('/users', methods=['POST'])
 def users_submit():
     """Submit a new user."""
+    if 'user' in session:
+        current_user = session['user']
+        return render_template('logged_in.html', current_user=current_user)
     user = {'username': request.form.get('username'),
             'password': request.form.get('password'),
             'bio': request.form.get('content'),
