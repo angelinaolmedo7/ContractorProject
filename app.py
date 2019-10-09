@@ -106,6 +106,8 @@ def users_submit():
     if 'user' in session:
         current_user = session['user']
         return render_template('logged_in.html', current_user=current_user)
+    if users.find_one({'username': request.form.get('username')}) is not None:
+        return redirect(url_for('users_new'))
     user = {'username': request.form.get('username'),
             'password': request.form.get('password'),
             'bio': request.form.get('content'),

@@ -5,7 +5,9 @@
     <div class='col-sm-6 col-sm-offset-3'>
         <form method='POST' action='/users'>
             <fieldset>
-
+                {% if error %}
+                <p>Error! {{ error }}</p>
+                {% endif %}
                 <legend>{{ title }}</legend>
                 <!-- USERNAME -->
                 <div class='form-group'>
