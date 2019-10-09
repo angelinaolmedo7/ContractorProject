@@ -1,9 +1,10 @@
 """RanchoStop is a store focusing on a modern rebranding of Tarantulas."""
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import os
 from datetime import datetime
+from flask_session import Session
 
 host = os.environ.get('MONGODB_URI', 'mongodb://localhost:27019/RanchoStop')
 client = MongoClient(host=f'{host}?retryWrites=false')
@@ -15,11 +16,35 @@ comments = db.comments
 
 app = Flask(__name__)
 
+SESSION_TYPE = 'mongodb'
+app.config.from_object(__name__)
+Session(app)
+
 
 @app.route('/')
 def home():
     """Return listings homepage."""
-    return render_template('listings_index.html', listings=listings.find())
+    return render_template('home.html', user=session['user'])
+
+
+# ---------------------------LOGIN---------------------------
+@app.route('/login')
+def login():
+    """Login from."""
+    return render_template('login.html')
+
+
+@app.route('/login/submit', methods=['POST'])
+def login_submit():
+    """Login submit."""
+    user = users.find_one({'username': request.form.get('username')})
+    print(user['username'])
+    if user is None:
+        return redirect(url_for('login'))
+    if user['password'] != request.form.get('password'):
+        return redirect(url_for('login'))
+    session['user'] = user
+    return redirect(url_for('home', user=session['user']))
 
 
 # ---------------------------USERS---------------------------
@@ -57,7 +82,7 @@ def users_edit(user_id):
 
 @app.route('/users/<user_id>', methods=['POST'])
 def users_update(user_id):
-    """Submit an edited listing."""
+    """Submit an edited user profile."""
     updated_user = {
         'bio': request.form.get('content')
     }
@@ -155,13 +180,12 @@ def listings_update(listing_id):
     """Submit an edited listing."""
     # log in
     listing = listings.find_one({'_id': ObjectId(listing_id)})
-    if listing['author'] != request.form.get('username'):
-        return render_template('go_back.html')
-    user = users.find_one({'username': request.form.get('username')})
+    user = users.find_one({'_id': ObjectId(listing['user_id'])})
     if user is None:
         return render_template('go_back.html')
     if user['password'] != request.form.get('password'):
         return render_template('go_back.html')
+
     updated_listing = {
         'title': request.form.get('title'),
         'description': request.form.get('description')
@@ -197,6 +221,14 @@ def ranchos_update(rancho_id):
 @app.route('/listings/<listing_id>/delete', methods=['POST'])
 def listings_delete(listing_id):
     """Delete one listing."""
+    # log in
+    listing = listings.find_one({'_id': ObjectId(listing_id)})
+    user = users.find_one({'_id': ObjectId(listing['user_id'])})
+    if user is None:
+        return render_template('go_back.html')
+    if user['password'] != request.form.get('password'):
+        return render_template('go_back.html')
+
     listings.delete_one({'_id': ObjectId(listing_id)})
     return redirect(url_for('listings_home'))
 

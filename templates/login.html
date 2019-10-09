@@ -3,11 +3,7 @@
 {% block body %}
 <div class='row'>
     <div class='col-sm-6 col-sm-offset-3'>
-        <form method='POST' action='/listings'>
-            {% include 'partials/listing_form.html' %}
-
-            <!-- LOGIN -->
-            <h4>Log in to post:</h4>
+        <form method='POST' action='/login/submit'>
             <div class='form-group'>
                 <label for='username'>Username</label><br>
                 <input class='form-control' id='username' type='text' name='username'/>
@@ -16,10 +12,9 @@
                 <label for='password'>Password</label><br>
                 <input class='form-control' id='password' type='text' name='password'/>
             </div>
-
             <!-- BUTTON -->
             <div class='form-group'>
-                <button class='btn btn-primary' type='submit'>Save Listing</button>
+                <button class='btn btn-primary' type='submit'>Log In</button>
                 <a href='/listings_home'>Cancel</a>
             </div>
         </form>

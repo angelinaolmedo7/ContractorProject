@@ -6,6 +6,13 @@
         <form method='POST' action='/listings/{{listing._id}}'>
             <input type='hidden' name='_method' value='PUT'/>
             {% include 'partials/listing_form.html' %}
+
+            <!-- LOGIN -->
+            <h4>Enter your password to edit:</h4>
+            <div class='form-group'>
+                <label for='password'>Password</label><br>
+                <input class='form-control' id='password' type='text' name='password'/>
+            </div>
             <!-- BUTTON -->
             <div class='form-group'>
                 <button class='btn btn-primary' type='submit'>Save Listing</button>
