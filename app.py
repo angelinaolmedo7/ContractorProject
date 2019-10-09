@@ -169,6 +169,7 @@ def users_delete(user_id):
     if current_user['_id'] != ObjectId(user_id):
         return render_template('go_back.html', current_user=current_user)
     users.delete_one({'_id': ObjectId(user_id)})
+    session.pop('user', None)
     return redirect(url_for('users_directory'))
 
 
