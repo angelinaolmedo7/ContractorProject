@@ -5,6 +5,7 @@ from bson.objectid import ObjectId
 import os
 from datetime import datetime
 from flask_session import Session
+from functools import wraps
 
 host = os.environ.get('MONGODB_URI', 'mongodb://localhost:27019/RanchoStop')
 client = MongoClient(host=f'{host}?retryWrites=false')
@@ -21,6 +22,22 @@ app.config.from_object(__name__)
 Session(app)
 
 
+def login_required(f):
+    """
+    Require login to access a page.
+
+    Adapted from:
+    https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+# ---------------------------HOME---------------------------
 @app.route('/')
 def home():
     """Return listings homepage."""
@@ -147,6 +164,7 @@ def listings_home():
 
 
 @app.route('/listings/new')
+@login_required
 def listings_new():
     """Create a new listing."""
     current_user = None
