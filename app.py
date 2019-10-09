@@ -116,20 +116,29 @@ def users_submit():
 
 
 @app.route('/users/<user_id>/edit')
+@login_required
 def users_edit(user_id):
     """Show the edit form for a user profile."""
-    current_user = None
-    if 'user' in session:
-        current_user = session['user']
+    current_user = session['user']
     user = users.find_one({'_id': ObjectId(user_id)})
+    if current_user['_id'] != user['_id']:
+        print(current_user['_id'])
+        print(user_id)
+        return render_template('go_back.html', current_user=current_user)
+
     return render_template('users_edit.html', user=user,
                            title='Edit User Profile',
                            current_user=current_user)
 
 
 @app.route('/users/<user_id>', methods=['POST'])
+@login_required
 def users_update(user_id):
     """Submit an edited user profile."""
+    current_user = session['user']
+    if current_user['_id'] != ObjectId(user_id):
+        return render_template('go_back.html', current_user=current_user)
+
     updated_user = {
         'bio': request.form.get('content')
     }
@@ -153,8 +162,12 @@ def users_show(user_id):
 
 
 @app.route('/users/<user_id>/delete', methods=['POST'])
+@login_required
 def users_delete(user_id):
     """Delete one user."""
+    current_user = session['user']
+    if current_user['_id'] != ObjectId(user_id):
+        return render_template('go_back.html', current_user=current_user)
     users.delete_one({'_id': ObjectId(user_id)})
     return redirect(url_for('users_directory'))
 
@@ -225,7 +238,7 @@ def listings_edit(listing_id):
     current_user = session['user']
     listing = listings.find_one({'_id': ObjectId(listing_id)})
     if (current_user['_id'] != listing['user_id']):
-        return render_template('go_back.html')
+        return render_template('go_back.html', current_user=current_user)
     return render_template('listings_edit.html', listing=listing,
                            title='Edit Listing', current_user=current_user)
 
@@ -237,7 +250,7 @@ def listings_update(listing_id):
     current_user = session['user']
     listing = listings.find_one({'_id': ObjectId(listing_id)})
     if (current_user['_id'] != listing['user_id']):
-        return render_template('go_back.html')
+        return render_template('go_back.html', current_user=current_user)
 
     updated_listing = {
         'title': request.form.get('title'),
@@ -256,7 +269,7 @@ def listings_delete(listing_id):
     current_user = session['user']
     listing = listings.find_one({'_id': ObjectId(listing_id)})
     if (current_user['_id'] != listing['user_id']):
-        return render_template('go_back.html')
+        return render_template('go_back.html', current_user=current_user)
 
     listings.delete_one({'_id': ObjectId(listing_id)})
     return redirect(url_for('listings_home'))
@@ -334,7 +347,7 @@ def comments_delete(comment_id):
     current_user = session['user']
     comment = comments.find_one({'_id': ObjectId(comment_id)})
     if (current_user['_id'] != comment['user_id']):
-        return render_template('go_back.html')
+        return render_template('go_back.html', current_user=current_user)
 
     comments.delete_one({'_id': ObjectId(comment_id)})
     return redirect(url_for('listings_show',
