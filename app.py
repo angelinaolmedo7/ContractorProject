@@ -1,4 +1,4 @@
-"""RanchoStop is a store focusing on a modern rebranding of Tarantulas."""
+"""RanchoStop is a site focusing on a modern rebranding of Tarantulas."""
 from flask import Flask, render_template, request, redirect, url_for, session
 from pymongo import MongoClient
 from bson.objectid import ObjectId
