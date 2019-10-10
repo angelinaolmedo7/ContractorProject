@@ -7,7 +7,7 @@ from datetime import datetime
 from flask_session import Session
 from functools import wraps
 
-host = os.environ.get('MONGODB_URI', 'mongodb://localhost:27019/RanchoStop')
+host = os.environ.get('MONGODB_URI', 'mongodb://localhost:27017/RanchoStop')
 client = MongoClient(host=f'{host}?retryWrites=false')
 db = client.get_default_database()
 users = db.users
