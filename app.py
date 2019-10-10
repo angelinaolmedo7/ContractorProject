@@ -6,6 +6,9 @@ import os
 from datetime import datetime
 from flask_session import Session
 from functools import wraps
+from bson import json_util
+from bson.json_util import loads, dumps
+import json
 
 host = os.environ.get('MONGODB_URI', 'mongodb://127.0.0.1:27017/RanchoStop')
 client = MongoClient(host=f'{host}?retryWrites=false')
@@ -16,10 +19,11 @@ listings = db.listings
 comments = db.comments
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'THISISAFUCKINGAMAZINGSECRETKEYEATME'
 
-SESSION_TYPE = 'mongodb'
-app.config.from_object(__name__)
-Session(app)
+# SESSION_TYPE = 'mongodb'
+# app.config.from_object(__name__)
+# Session(app)
 
 
 def login_required(f):
@@ -44,6 +48,7 @@ def home():
     current_user = None
     if 'user' in session:
         current_user = session['user']
+        print(current_user)
     return render_template('home.html', current_user=current_user)
 
 
@@ -63,20 +68,30 @@ def login_submit():
     current_user = None
     if 'user' in session:
         current_user = session['user']
+
     user = users.find_one({'username': request.form.get('username')})
-    print(user['username'])
+
     if user is None:
         return redirect(url_for('login'))
     if user['password'] != request.form.get('password'):
         return redirect(url_for('login'))
-    session['user'] = user
+
+    data = {
+        'username': request.form.get('username'),
+        'user_id': user['_id']
+    }
+
+    session['user'] = json.loads(json_util.dumps(data))
+
+    current_user = session['user']
     return redirect(url_for('home', current_user=current_user))
 
 
 @app.route('/logout')
 def logout():
     """Remove user from session."""
-    session.pop('user', None)
+    # session.pop('user', None)
+    session.clear()
     return redirect(url_for('home'))
 
 
@@ -106,14 +121,26 @@ def users_submit():
     if 'user' in session:
         current_user = session['user']
         return render_template('logged_in.html', current_user=current_user)
+
     if users.find_one({'username': request.form.get('username')}) is not None:
         return redirect(url_for('users_new'))
-    user = {'username': request.form.get('username'),
-            'password': request.form.get('password'),
-            'bio': request.form.get('content'),
-            'created_at': datetime.now()
-            }
+
+    user = {
+        'username': request.form.get('username'),
+        'password': request.form.get('password'),
+        'bio': request.form.get('content'),
+        'created_at': datetime.now(),
+    }
+
     user_id = users.insert_one(user).inserted_id
+
+    data = {
+        'username': request.form.get('username'),
+        'user_id': user_id
+    }
+
+    session['user'] = json.loads(json_util.dumps(data))
+    print(session['user'])
     return redirect(url_for('users_show', user_id=user_id))
 
 
@@ -122,7 +149,9 @@ def users_submit():
 def users_edit(user_id):
     """Show the edit form for a user profile."""
     current_user = session['user']
+
     user = users.find_one({'_id': ObjectId(user_id)})
+
     if current_user['_id'] != user['_id']:
         print(current_user['_id'])
         print(user_id)
@@ -138,12 +167,14 @@ def users_edit(user_id):
 def users_update(user_id):
     """Submit an edited user profile."""
     current_user = session['user']
+
     if current_user['_id'] != ObjectId(user_id):
         return render_template('go_back.html', current_user=current_user)
 
     updated_user = {
         'bio': request.form.get('content')
     }
+
     users.update_one(
         {'_id': ObjectId(user_id)},
         {'$set': updated_user})
@@ -154,8 +185,10 @@ def users_update(user_id):
 def users_show(user_id):
     """Show a single user page."""
     current_user = None
+
     if 'user' in session:
         current_user = session['user']
+
     user = users.find_one({'_id': ObjectId(user_id)})
     user_ranchos = ranchos.find({'user_id': ObjectId(user_id)})
     return render_template('users_show.html', user=user,
@@ -168,10 +201,14 @@ def users_show(user_id):
 def users_delete(user_id):
     """Delete one user."""
     current_user = session['user']
+
     if current_user['_id'] != ObjectId(user_id):
         return render_template('go_back.html', current_user=current_user)
+
     users.delete_one({'_id': ObjectId(user_id)})
-    session.pop('user', None)
+
+    session.clear()  # Clear Session
+
     return redirect(url_for('users_directory'))
 
 
@@ -182,6 +219,7 @@ def listings_home():
     current_user = None
     if 'user' in session:
         current_user = session['user']
+
     return render_template('listings_index.html', listings=listings.find(),
                            current_user=current_user)
 
@@ -191,6 +229,7 @@ def listings_home():
 def listings_new():
     """Create a new listing."""
     current_user = session['user']
+
     return render_template('new_listing.html', listing={}, title='New Listing',
                            current_user=current_user)
 
@@ -200,13 +239,14 @@ def listings_new():
 def listing_submit():
     """Submit a new listing."""
     current_user = session['user']
-    listing = {'title': request.form.get('title'),
-               'description': request.form.get('description'),
-               'views': 0,
-               'created_at': datetime.now(),
-               'author': current_user['username'],
-               'user_id': current_user['_id']
-               }
+    listing = {
+        'title': request.form.get('title'),
+        'description': request.form.get('description'),
+        'views': 0,
+        'created_at': datetime.now(),
+        'author': current_user['username'],
+        'user_id': ObjectId(current_user['_id'])
+    }
     listing_id = listings.insert_one(listing).inserted_id
     return redirect(url_for('listings_show', listing_id=listing_id))
 
@@ -240,8 +280,10 @@ def listings_edit(listing_id):
     """Show the edit form for a listing."""
     current_user = session['user']
     listing = listings.find_one({'_id': ObjectId(listing_id)})
+
     if (current_user['_id'] != listing['user_id']):
         return render_template('go_back.html', current_user=current_user)
+
     return render_template('listings_edit.html', listing=listing,
                            title='Edit Listing', current_user=current_user)
 
