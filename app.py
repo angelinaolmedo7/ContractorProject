@@ -378,7 +378,7 @@ def comments_new():
         'content': request.form.get('content'),
         'listing_id': ObjectId(request.form.get('listing_id')),
         'author': current_user['username'],
-        'user_id': current_user['_id']
+        'user_id': ObjectId(current_user['user_id'])
     }
     comments.insert_one(comment)
     return redirect(url_for('listings_show',
@@ -391,7 +391,8 @@ def comments_delete(comment_id):
     """Delete a comment."""
     current_user = session['user']
     comment = comments.find_one({'_id': ObjectId(comment_id)})
-    if (current_user['_id'] != comment['user_id']):
+
+    if ObjectId(current_user['user_id']) != comment['user_id']:
         return render_template('go_back.html', current_user=current_user)
 
     comments.delete_one({'_id': ObjectId(comment_id)})
