@@ -245,7 +245,7 @@ def listing_submit():
         'views': 0,
         'created_at': datetime.now(),
         'author': current_user['username'],
-        'user_id': ObjectId(current_user['_id'])
+        'user_id': ObjectId(current_user['user_id'])
     }
     listing_id = listings.insert_one(listing).inserted_id
     return redirect(url_for('listings_show', listing_id=listing_id))
@@ -281,7 +281,7 @@ def listings_edit(listing_id):
     current_user = session['user']
     listing = listings.find_one({'_id': ObjectId(listing_id)})
 
-    if (current_user['_id'] != listing['user_id']):
+    if ObjectId(current_user['user_id']) != listing['user_id']:
         return render_template('go_back.html', current_user=current_user)
 
     return render_template('listings_edit.html', listing=listing,
@@ -294,7 +294,7 @@ def listings_update(listing_id):
     """Submit an edited listing."""
     current_user = session['user']
     listing = listings.find_one({'_id': ObjectId(listing_id)})
-    if (current_user['_id'] != listing['user_id']):
+    if ObjectId(current_user['user_id']) != listing['user_id']:
         return render_template('go_back.html', current_user=current_user)
 
     updated_listing = {
@@ -313,7 +313,7 @@ def listings_delete(listing_id):
     """Delete one listing."""
     current_user = session['user']
     listing = listings.find_one({'_id': ObjectId(listing_id)})
-    if (current_user['_id'] != listing['user_id']):
+    if ObjectId(current_user['user_id']) != listing['user_id']:
         return render_template('go_back.html', current_user=current_user)
 
     listings.delete_one({'_id': ObjectId(listing_id)})
