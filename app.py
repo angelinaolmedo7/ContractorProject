@@ -19,7 +19,7 @@ listings = db.listings
 comments = db.comments
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'THISISAFUCKINGAMAZINGSECRETKEYEATME'
+app.config['SECRET_KEY'] = 'THISISMYSECRETKEY'
 
 # SESSION_TYPE = 'mongodb'
 # app.config.from_object(__name__)
@@ -78,7 +78,7 @@ def login_submit():
 
     data = {
         'username': request.form.get('username'),
-        'user_id': user['_id']
+        'user_id': str(user['_id'])
     }
 
     session['user'] = json.loads(json_util.dumps(data))
@@ -136,11 +136,13 @@ def users_submit():
 
     data = {
         'username': request.form.get('username'),
-        'user_id': user_id
+        'user_id': str(user_id)
     }
 
     session['user'] = json.loads(json_util.dumps(data))
-    print(session['user'])
+    print(user_id)
+    print(users.find_one({'username': request.form.get('username')})['_id'])
+    print(session['user']['user_id'])
     return redirect(url_for('users_show', user_id=user_id))
 
 
@@ -152,9 +154,7 @@ def users_edit(user_id):
 
     user = users.find_one({'_id': ObjectId(user_id)})
 
-    if current_user['_id'] != user['_id']:
-        print(current_user['_id'])
-        print(user_id)
+    if ObjectId(current_user['user_id']) != user['_id']:
         return render_template('go_back.html', current_user=current_user)
 
     return render_template('users_edit.html', user=user,
@@ -168,7 +168,7 @@ def users_update(user_id):
     """Submit an edited user profile."""
     current_user = session['user']
 
-    if current_user['_id'] != ObjectId(user_id):
+    if ObjectId(current_user['user_id']) != ObjectId(user_id):
         return render_template('go_back.html', current_user=current_user)
 
     updated_user = {
@@ -202,7 +202,7 @@ def users_delete(user_id):
     """Delete one user."""
     current_user = session['user']
 
-    if current_user['_id'] != ObjectId(user_id):
+    if ObjectId(current_user['user_id']) != ObjectId(user_id):
         return render_template('go_back.html', current_user=current_user)
 
     users.delete_one({'_id': ObjectId(user_id)})
