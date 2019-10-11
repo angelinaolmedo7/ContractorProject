@@ -48,7 +48,7 @@ def home():
     current_user = None
     if 'user' in session:
         current_user = session['user']
-        print(current_user)
+        # print(current_user)
     return render_template('home.html', current_user=current_user)
 
 
@@ -140,9 +140,9 @@ def users_submit():
     }
 
     session['user'] = json.loads(json_util.dumps(data))
-    print(user_id)
-    print(users.find_one({'username': request.form.get('username')})['_id'])
-    print(session['user']['user_id'])
+    # print(user_id)
+    # print(users.find_one({'username': request.form.get('username')})['_id'])
+    # print(session['user']['user_id'])
     return redirect(url_for('users_show', user_id=user_id))
 
 
@@ -320,7 +320,7 @@ def listings_delete(listing_id):
     return redirect(url_for('listings_home'))
 
 
-# ---------------------------RANCHOS---------------------------
+# -------------------------RANCHOS (NOT IMPLEMENTED)-------------------------
 @app.route('/ranchos/<rancho_id>')
 def ranchos_show(rancho_id):
     """Show a single Rancho."""
