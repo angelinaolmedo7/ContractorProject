@@ -4,7 +4,7 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 import os
 from datetime import datetime
-from flask_session import Session
+from random import choice, randint
 from functools import wraps
 from bson import json_util
 from bson.json_util import loads, dumps
@@ -190,6 +190,7 @@ def users_show(user_id):
         current_user = session['user']
 
     user = users.find_one({'_id': ObjectId(user_id)})
+
     user_ranchos = ranchos.find({'user_id': ObjectId(user_id)})
     return render_template('users_show.html', user=user,
                            ranchos=user_ranchos,
@@ -321,6 +322,49 @@ def listings_delete(listing_id):
 
 
 # -------------------------RANCHOS (NOT IMPLEMENTED)-------------------------
+@app.route('/ranchos/adoption_center')
+@login_required
+def adoption_center():
+    """Show the adoption page with randomized ranchos."""
+    current_user = session['user']
+    rancho_species = ['Goliath Birdeater', 'Cobalt Blue']
+    rancho_sex = ['Male', 'Female']
+    ranchos_list = []
+
+    for x in range(0, 9):
+        rancho = {
+            'species': choice(rancho_species),
+            'sex': choice(rancho_sex),
+            'health': randint(1, 100),
+            'dexterity': randint(1, 100),
+            'docility': randint(1, 100),
+            'created_at': datetime.now(),
+            'conformation': randint(1, 100)
+        }
+        ranchos_list.append(rancho)
+
+    return render_template('adoption_center.html', ranchos_list=ranchos_list,
+                           current_user=current_user)
+
+
+@app.route('/ranchos/new', methods=['POST'])
+@login_required
+def ranchos_new():
+    """Submit a new comment."""
+    current_user = session['user']
+    rancho = {
+        'species': request.form.get('species'),
+        'sex': request.form.get('sex'),
+        'health': request.form.get('health'),
+        'dexterity': request.form.get('dexterity'),
+        'docility': request.form.get('docility'),
+        'conformation': request.form.get('conformation'),
+        'user_id': ObjectId(current_user['user_id'])
+    }
+    rancho_id = ranchos.insert_one(rancho).inserted_id
+    return redirect(url_for('ranchos_show', rancho_id=rancho_id))
+
+
 @app.route('/ranchos/<rancho_id>')
 def ranchos_show(rancho_id):
     """Show a single Rancho."""
@@ -328,9 +372,7 @@ def ranchos_show(rancho_id):
     if 'user' in session:
         current_user = session['user']
     rancho = ranchos.find_one({'_id': ObjectId(rancho_id)})
-    listing_comments = comments.find({'rancho_id': ObjectId(rancho_id)})
     return render_template('ranchos_show.html', rancho=rancho,
-                           comments=listing_comments,
                            current_user=current_user)
 
 

@@ -14,6 +14,10 @@
         <p>
             <a href='/users/{{ user._id }}/edit'>Edit</a>
         </p>
+
+        {% for rancho in ranchos %}
+            {% include 'partials/rancho_card.html' %}
+        {% endfor %}
     </div>
 </div>
 

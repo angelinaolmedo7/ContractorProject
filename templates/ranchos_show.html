@@ -5,32 +5,7 @@
 <a href='/'>Back to Home</a>
 <div class='row'>
     <div class='col-sm-6 col-sm-offset-3'>
-        <h1>{{ rancho.title }}</h1>
-        {% if rancho.created_at %}
-        <p class='text-muted'>Created on {{ rancho.created_at.strftime('%A, %d %B, %Y') }}
-            at {{ rancho.created_at.strftime('%I:%M %p') }}</p>
-        {% endif %}
-        <h2>{{ rancho.species }}</h2>
-        <p>{{ rancho.description }}</p>
-
-        <p><a href='/ranchos/{{ rancho._id }}/edit'>Edit</a></p>
-        <!-- Delete button -->
-        <p>
-            <form method='POST' action='/ranchos/{{ rancho._id }}/delete'>
-                <button type='submit'>Delete</button>
-            </form>
-        </p>
-
-        <hr>
-
-    <!-- Comment form -->
-    {% include 'partials/comment_form.html' %}
-
-    <!-- Show Comments -->
-    {% for comment in comments %}
-        {% include 'partials/comment.html' %}
-    {% endfor %}
-
+        {% include 'partials/rancho_card.html' %}
     </div>
 </div>
 

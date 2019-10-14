@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class='row'>
+    <div class='col-sm-6 col-sm-offset-3'>
+        {% for rancho in ranchos_list %}
+            <form method='POST' action='/ranchos/new'>
+                <input type='hidden' name='species' value='{{ rancho.species }}'/>
+                <input type='hidden' name='sex' value='{{ rancho.sex }}'/>
+                <input type='hidden' name='health' value='{{ rancho.health }}'/>
+                <input type='hidden' name='dexterity' value='{{ rancho.dexterity }}'/>
+                <input type='hidden' name='docility' value='{{ rancho.docility }}'/>
+                <input type='hidden' name='conformation' value='{{ rancho.conformation }}'/>
+
+                {% include 'partials/rancho_card.html' %}
+                <!-- BUTTON -->
+                <div class='form-group'>
+                    <button class='btn btn-primary' type='submit'>Adopt me!</button>
+                </div>
+            </form>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
