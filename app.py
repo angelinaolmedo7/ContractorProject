@@ -347,7 +347,8 @@ def adoption_center():
         }
         ranchos_list.append(rancho)
 
-    return render_template('adoption_center.html', ranchos_list=ranchos_list,
+    return render_template('ranchos/adoption_center.html',
+                           ranchos_list=ranchos_list,
                            current_user=current_user)
 
 
@@ -357,6 +358,8 @@ def ranchos_new():
     """Submit a new comment."""
     current_user = session['user']
     rancho = {
+        'name': 'New Rancho',
+        'bio': request.form.get('sex') + ' ' + request.form.get('species'),
         'species': request.form.get('species'),
         'sex': request.form.get('sex'),
         'health': request.form.get('health'),
@@ -366,7 +369,7 @@ def ranchos_new():
         'user_id': ObjectId(current_user['user_id'])
     }
     rancho_id = ranchos.insert_one(rancho).inserted_id
-    return redirect(url_for('ranchos_show', rancho_id=rancho_id))
+    return redirect(url_for('ranchos_edit', rancho_id=rancho_id))
 
 
 @app.route('/ranchos/<rancho_id>')
@@ -376,18 +379,21 @@ def ranchos_show(rancho_id):
     if 'user' in session:
         current_user = session['user']
     rancho = ranchos.find_one({'_id': ObjectId(rancho_id)})
-    return render_template('ranchos_show.html', rancho=rancho,
+    return render_template('ranchos/ranchos_show.html', rancho=rancho,
                            current_user=current_user)
 
 
 @app.route('/ranchos/<rancho_id>/edit')
+@login_required
 def ranchos_edit(rancho_id):
     """Show the edit form for a Rancho profile."""
-    current_user = None
-    if 'user' in session:
-        current_user = session['user']
+    current_user = session['user']
     rancho = ranchos.find_one({'_id': ObjectId(rancho_id)})
-    return render_template('ranchos_edit.html', rancho=rancho,
+
+    if ObjectId(current_user['user_id']) != rancho['user_id']:
+        return render_template('go_back.html', current_user=current_user)
+
+    return render_template('ranchos/ranchos_edit.html', rancho=rancho,
                            title='Edit Rancho Profile',
                            current_user=current_user)
 
@@ -396,9 +402,8 @@ def ranchos_edit(rancho_id):
 def ranchos_update(rancho_id):
     """Submit an edited rancho profile."""
     updated_prof = {
-        'title': request.form.get('title'),
-        'species': request.form.get('species'),
-        'description': request.form.get('description')
+        'name': request.form.get('rancho_name'),
+        'bio': request.form.get('description')
     }
     ranchos.update_one(
         {'_id': ObjectId(rancho_id)},
