@@ -58,8 +58,9 @@ def login():
     """Login from."""
     if 'user' in session:
         current_user = session['user']
-        return render_template('logged_in.html', current_user=current_user)
-    return render_template('login.html')
+        return render_template('users/logged_in.html',
+                               current_user=current_user)
+    return render_template('users/login.html')
 
 
 @app.route('/login/submit', methods=['POST'])
@@ -101,8 +102,9 @@ def users_new():
     """Return a user creation page with starter Ranchos."""
     if 'user' in session:
         current_user = session['user']
-        return render_template('logged_in.html', current_user=current_user)
-    return render_template('new_user.html', user={}, title='New User')
+        return render_template('users/logged_in.html',
+                               current_user=current_user)
+    return render_template('users/new_user.html', user={}, title='New User')
 
 
 @app.route('/users/directory')
@@ -111,7 +113,7 @@ def users_directory():
     current_user = None
     if 'user' in session:
         current_user = session['user']
-    return render_template('users_directory.html', users=users.find(),
+    return render_template('users/users_directory.html', users=users.find(),
                            current_user=current_user)
 
 
@@ -120,7 +122,8 @@ def users_submit():
     """Submit a new user."""
     if 'user' in session:
         current_user = session['user']
-        return render_template('logged_in.html', current_user=current_user)
+        return render_template('users/logged_in.html',
+                               current_user=current_user)
 
     if users.find_one({'username': request.form.get('username')}) is not None:
         return redirect(url_for('users_new'))
@@ -157,7 +160,7 @@ def users_edit(user_id):
     if ObjectId(current_user['user_id']) != user['_id']:
         return render_template('go_back.html', current_user=current_user)
 
-    return render_template('users_edit.html', user=user,
+    return render_template('users/users_edit.html', user=user,
                            title='Edit User Profile',
                            current_user=current_user)
 
@@ -192,7 +195,7 @@ def users_show(user_id):
     user = users.find_one({'_id': ObjectId(user_id)})
 
     user_ranchos = ranchos.find({'user_id': ObjectId(user_id)})
-    return render_template('users_show.html', user=user,
+    return render_template('users/users_show.html', user=user,
                            ranchos=user_ranchos,
                            current_user=current_user)
 
@@ -221,8 +224,8 @@ def listings_home():
     if 'user' in session:
         current_user = session['user']
 
-    return render_template('listings_index.html', listings=listings.find(),
-                           current_user=current_user)
+    return render_template('/listings/listings_index.html',
+                           listings=listings.find(), current_user=current_user)
 
 
 @app.route('/listings/new')
@@ -231,7 +234,8 @@ def listings_new():
     """Create a new listing."""
     current_user = session['user']
 
-    return render_template('new_listing.html', listing={}, title='New Listing',
+    return render_template('listings/new_listing.html',
+                           listing={}, title='New Listing',
                            current_user=current_user)
 
 
@@ -270,7 +274,7 @@ def listings_show(listing_id):
         {'_id': ObjectId(listing_id)},
         {'$set': updated_views})
 
-    return render_template('listings_show.html', listing=listing,
+    return render_template('listings/listings_show.html', listing=listing,
                            comments=listing_comments, user=listing_author,
                            current_user=current_user)
 
@@ -285,7 +289,7 @@ def listings_edit(listing_id):
     if ObjectId(current_user['user_id']) != listing['user_id']:
         return render_template('go_back.html', current_user=current_user)
 
-    return render_template('listings_edit.html', listing=listing,
+    return render_template('listings/listings_edit.html', listing=listing,
                            title='Edit Listing', current_user=current_user)
 
 

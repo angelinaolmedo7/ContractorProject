@@ -1,4 +1,7 @@
 <div class="card border-secondary mb-3" style="max-width: 20rem;">
+  {% if rancho.name %}
+    <div class="card-header">{{ rancho.name }}</div>
+  {% endif %}
   <div class="card-header">{{ rancho.sex }} {{ rancho.species }}</div>
   <div class="card-body">
     <h4 class="card-title">Stats</h4>
