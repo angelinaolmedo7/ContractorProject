@@ -5,7 +5,13 @@
 <a href='/'>Back to Home</a>
 <div class='row'>
     <div class='col-sm-6 col-sm-offset-3'>
-        {% include 'partials/rancho_card.html' %}
+        <h1>{{ rancho.name }}</h1>
+        <h2>Lvl.{{ rancho.level }} {{ rancho.sex }} {{ rancho.species }}</h2>
+        {% include 'ranchos/stat_table.html' %}
+        <p>{{ rancho.bio }}</p>
+        <p>
+            <a href='/ranchos/{{ rancho._id }}/edit'>Edit</a>
+        </p>
     </div>
 </div>
 

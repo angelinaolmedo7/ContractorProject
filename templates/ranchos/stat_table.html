@@ -1,0 +1,29 @@
+<div class="card border-secondary mb-3" style="max-width: 20rem;">
+  {% if rancho.name %}
+    <div class="card-header">{{ rancho.name }}'s Stats</div>
+  {% endif %}
+  <div class="card-body">
+    <h4 class="card-title">Stats</h4>
+
+    <div class="progress">
+        <div class="progress-bar" role="progressbar" style="width: {{ rancho.health }}%;" aria-valuenow="{{ rancho.health }}" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+    <p class="card-text">Health: {{ rancho.health }}/100</p>
+
+    <div class="progress">
+        <div class="progress-bar" role="progressbar" style="width: {{ rancho.dexterity }}%;" aria-valuenow="{{ rancho.dexterity }}" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+    <p class="card-text">Speed: {{ rancho.dexterity }}/100</p>
+
+    <div class="progress">
+        <div class="progress-bar" role="progressbar" style="width: {{ rancho.docility }}%;" aria-valuenow="{{ rancho.docility }}" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+    <p class="card-text">Docility: {{ rancho.docility }}/100</p>
+
+    <div class="progress">
+        <div class="progress-bar" role="progressbar" style="width: {{ rancho.conformation }}%;" aria-valuenow="{{ rancho.conformation }}" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+    <p class="card-text">Conformation: {{ rancho.conformation }}/100</p>
+
+  </div>
+</div>

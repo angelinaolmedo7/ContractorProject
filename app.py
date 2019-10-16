@@ -360,6 +360,7 @@ def ranchos_new():
     rancho = {
         'name': 'New Rancho',
         'bio': request.form.get('sex') + ' ' + request.form.get('species'),
+        'level': 1,
         'species': request.form.get('species'),
         'sex': request.form.get('sex'),
         'health': request.form.get('health'),
