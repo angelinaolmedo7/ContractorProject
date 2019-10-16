@@ -49,6 +49,7 @@ def home():
     current_user = None
     if 'user' in session:
         current_user = session['user']
+
         # print(current_user)
     return render_template('home.html', current_user=current_user)
 
@@ -340,11 +341,13 @@ def adoption_center():
         rancho = {
             'species': choice(rancho_species),
             'sex': choice(rancho_sex),
-            'health': randint(1, 100),
-            'dexterity': randint(1, 100),
-            'docility': randint(1, 100),
-            'created_at': datetime.now(),
-            'conformation': randint(1, 100)
+            'stats': {
+                'health': randint(1, 100),
+                'dexterity': randint(1, 100),
+                'docility': randint(1, 100),
+                'conformation': randint(1, 100),
+            },
+            'created_at': datetime.now()
         }
         ranchos_list.append(rancho)
 
@@ -358,17 +361,20 @@ def adoption_center():
 def ranchos_new():
     """Submit a new Rancho."""
     current_user = session['user']
+    stats = {
+        'health': request.form.get('health'),
+        'dexterity': request.form.get('dexterity'),
+        'docility': request.form.get('docility'),
+        'conformation': request.form.get('conformation')
+    }
     rancho = {
         'name': 'New Rancho',
         'bio': request.form.get('sex') + ' ' + request.form.get('species'),
         'xp': 1000,
         'level': level_calc(1000),
+        'stats': stats,
         'species': request.form.get('species'),
         'sex': request.form.get('sex'),
-        'health': request.form.get('health'),
-        'dexterity': request.form.get('dexterity'),
-        'docility': request.form.get('docility'),
-        'conformation': request.form.get('conformation'),
         'user_id': ObjectId(current_user['user_id'])
     }
     rancho_id = ranchos.insert_one(rancho).inserted_id

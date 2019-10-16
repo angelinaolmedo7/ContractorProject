@@ -7,10 +7,10 @@
             <form method='POST' action='/ranchos/new'>
                 <input type='hidden' name='species' value='{{ rancho.species }}'/>
                 <input type='hidden' name='sex' value='{{ rancho.sex }}'/>
-                <input type='hidden' name='health' value='{{ rancho.health }}'/>
-                <input type='hidden' name='dexterity' value='{{ rancho.dexterity }}'/>
-                <input type='hidden' name='docility' value='{{ rancho.docility }}'/>
-                <input type='hidden' name='conformation' value='{{ rancho.conformation }}'/>
+                <input type='hidden' name='health' value="{{ rancho['stats'].health }}"/>
+                <input type='hidden' name='dexterity' value="{{ rancho['stats'].dexterity }}"/>
+                <input type='hidden' name='docility' value="{{ rancho['stats'].docility }}"/>
+                <input type='hidden' name='conformation' value="{{ rancho['stats'].conformation }}"/>
 
                 {% include 'partials/rancho_card.html' %}
                 <!-- BUTTON -->
