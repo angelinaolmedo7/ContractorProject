@@ -6,11 +6,14 @@
 <div class='row'>
     <div class='col-sm-6 col-sm-offset-3'>
         <h1>{{ rancho.name }}</h1>
+        {% if rancho.adopted_at %}
+        <p class='text-muted'>Adopted on {{ rancho.adopted_at.strftime('%A, %B %d, %Y at %I:%M %p') }}</p>
+        {% endif %}
         <h2>Lvl.{{ rancho.level }} {{ rancho.sex }} {{ rancho.species }}</h2>
         <p>{{ rancho.bio }}</p>
         <p>
             <a href='/ranchos/{{ rancho._id }}/care'>Care for</a>
-             | 
+             |
             <a href='/ranchos/{{ rancho._id }}/edit'>Edit</a>
         </p>
     </div>

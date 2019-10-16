@@ -379,6 +379,7 @@ def ranchos_new():
     rancho = {
         'name': 'New Rancho',
         'bio': request.form.get('sex') + ' ' + request.form.get('species'),
+        'adopted_at': datetime.now(),
         'xp': 1000,
         'level': level_calc(1000),
         'stats': stats,
