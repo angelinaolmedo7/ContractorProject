@@ -410,8 +410,9 @@ def ranchos_care(rancho_id):
     rancho = ranchos.find_one({'_id': ObjectId(rancho_id)})
 
     timediff = datetime.now() - rancho['needs']['last_cared']
-    if timediff.days >= 1:
+    if timediff.days >= 0:
         # Been more than a day since last cared for
+        # Set to 0 for testing
         new_health = rancho['needs']['health'] + 50
         if new_health > 100:
             new_health = 100
@@ -426,9 +427,15 @@ def ranchos_care(rancho_id):
             'cared_by_id': ObjectId(current_user['user_id'])
         }
 
+        new_xp = rancho['xp'] + 250
         ranchos.update_one(
             {'_id': ObjectId(rancho_id)},
-            {'$set': {'needs': new_needs}})
+            {'$set': {
+                'needs': new_needs,
+                'xp': new_xp,
+                'level': level_calc(new_xp)
+                }}
+            )
     # Can care for other people's Ranchos
     # if ObjectId(current_user['user_id']) != rancho['user_id']:
     #     return render_template('go_back.html', current_user=current_user)
