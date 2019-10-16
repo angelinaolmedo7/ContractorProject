@@ -410,9 +410,8 @@ def ranchos_care(rancho_id):
     rancho = ranchos.find_one({'_id': ObjectId(rancho_id)})
 
     timediff = datetime.now() - rancho['needs']['last_cared']
-    if timediff.days >= 0:
+    if timediff.days >= 1:
         # Been more than a day since last cared for
-        # Set to 0 for testing
         new_health = rancho['needs']['health'] + 50
         if new_health > 100:
             new_health = 100

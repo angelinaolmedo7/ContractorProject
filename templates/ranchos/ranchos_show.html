@@ -7,12 +7,20 @@
     <div class='col-sm-6 col-sm-offset-3'>
         <h1>{{ rancho.name }}</h1>
         <h2>Lvl.{{ rancho.level }} {{ rancho.sex }} {{ rancho.species }}</h2>
-        {% include 'ranchos/stat_table.html' %}
         <p>{{ rancho.bio }}</p>
         <p>
-            <a href='/ranchos/{{ rancho._id }}/edit'>Edit</a>
             <a href='/ranchos/{{ rancho._id }}/care'>Care for</a>
+             | 
+            <a href='/ranchos/{{ rancho._id }}/edit'>Edit</a>
         </p>
+    </div>
+</div>
+<div class='row'>
+    <div class='col-sm-6 col-sm-offset-3'>
+        {% include 'ranchos/needs_table.html' %}
+    </div>
+    <div class='col-sm-6 col-sm-offset-3'>
+        {% include 'ranchos/stat_table.html' %}
     </div>
 </div>
 
