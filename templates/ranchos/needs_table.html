@@ -1,25 +1,24 @@
-<div class="card border-secondary mb-3" style="max-width: 20rem;">
+<div class="card border-primary mb-3" style="max-width: 20rem;">
   <div class="card-header">{{ rancho.name }}'s Care</div>
   <div class="card-body">
-    <h4 class="card-title">Needs</h4>
-
+    <p>Last cared for by <a href="/users/{{ rancho['needs'].cared_by_id }}">{{ rancho['needs'].cared_by }}</a> on {{ rancho['needs'].last_cared.strftime('%A, %B %d, %Y at %I:%M %p') }}</p>
     <div class="progress">
-        <div class="progress-bar" role="progressbar" style="width: {{ rancho['needs'].food }}%;" aria-valuenow="{{ rancho['needs'].food }}" aria-valuemin="0" aria-valuemax="100"></div>
+        <div class="progress-bar progress-bar-striped bg-info" role="progressbar" style="width: {{ rancho['needs'].food }}%;" aria-valuenow="{{ rancho['needs'].food }}" aria-valuemin="0" aria-valuemax="100"></div>
     </div>
     <p class="card-text">Food: {{ rancho['needs'].food }}/100</p>
 
     <div class="progress">
-        <div class="progress-bar" role="progressbar" style="width: {{ rancho['needs'].water }}%;" aria-valuenow="{{ rancho['needs'].water }}" aria-valuemin="0" aria-valuemax="100"></div>
+        <div class="progress-bar progress-bar-striped bg-info" role="progressbar" style="width: {{ rancho['needs'].water }}%;" aria-valuenow="{{ rancho['needs'].water }}" aria-valuemin="0" aria-valuemax="100"></div>
     </div>
     <p class="card-text">Water: {{ rancho['needs'].water }}/100</p>
 
     <div class="progress">
-        <div class="progress-bar" role="progressbar" style="width: {{ rancho['needs'].health }}%;" aria-valuenow="{{ rancho['needs'].health }}" aria-valuemin="0" aria-valuemax="100"></div>
+        <div class="progress-bar progress-bar-striped bg-info" role="progressbar" style="width: {{ rancho['needs'].health }}%;" aria-valuenow="{{ rancho['needs'].health }}" aria-valuemin="0" aria-valuemax="100"></div>
     </div>
     <p class="card-text">Health: {{ rancho['needs'].health }}/100</p>
 
     <div class="progress">
-        <div class="progress-bar" role="progressbar" style="width: {{ rancho['needs'].happiness }}%;" aria-valuenow="{{ rancho['needs'].happiness }}" aria-valuemin="0" aria-valuemax="100"></div>
+        <div class="progress-bar progress-bar-striped bg-info" role="progressbar" style="width: {{ rancho['needs'].happiness }}%;" aria-valuenow="{{ rancho['needs'].happiness }}" aria-valuemin="0" aria-valuemax="100"></div>
     </div>
     <p class="card-text">Happiness: {{ rancho['needs'].happiness }}/100</p>
 

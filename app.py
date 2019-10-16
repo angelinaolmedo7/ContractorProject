@@ -398,6 +398,63 @@ def ranchos_show(rancho_id):
     if 'user' in session:
         current_user = session['user']
     rancho = ranchos.find_one({'_id': ObjectId(rancho_id)})
+
+    # Update needs
+    timediff = datetime.now() - rancho['needs']['last_cared']
+    if timediff.days > 0:
+        if timediff.days >= 4:
+            # Been more than four days since last cared for
+            new_needs = {
+                'food': 0,
+                'water': 0,
+                'health': 0,
+                'happiness': 0,
+                'last_cared': rancho['needs']['last_cared'],
+                'cared_by': rancho['needs']['cared_by'],
+                'cared_by_id': rancho['needs']['cared_by_id']
+            }
+
+        elif timediff.days >= 3:
+            # Been more than three days since last cared for
+
+            new_needs = {
+                'food': 25,
+                'water': 0,
+                'health': 50,
+                'happiness': 0,
+                'last_cared': rancho['needs']['last_cared'],
+                'cared_by': rancho['needs']['cared_by'],
+                'cared_by_id': rancho['needs']['cared_by_id']
+            }
+
+        elif timediff.days >= 2:
+            # Been more than two days since last cared for
+            new_needs = {
+                'food': 50,
+                'water': 0,
+                'health': 100,
+                'happiness': 50,
+                'last_cared': rancho['needs']['last_cared'],
+                'cared_by': rancho['needs']['cared_by'],
+                'cared_by_id': rancho['needs']['cared_by_id']
+            }
+
+        elif timediff.days >= 1:
+            # Been more than a day since last cared for
+            new_needs = {
+                'food': 75,
+                'water': 50,
+                'health': 100,
+                'happiness': 75,
+                'last_cared': rancho['needs']['last_cared'],
+                'cared_by': rancho['needs']['cared_by'],
+                'cared_by_id': rancho['needs']['cared_by_id']
+            }
+        ranchos.update_one(
+            {'_id': ObjectId(rancho_id)},
+            {'$set': {'needs': new_needs}}
+            )
+
     return render_template('ranchos/ranchos_show.html', rancho=rancho,
                            current_user=current_user)
 
@@ -458,8 +515,14 @@ def ranchos_edit(rancho_id):
 
 
 @app.route('/ranchos/<rancho_id>', methods=['POST'])
+@login_required
 def ranchos_update(rancho_id):
     """Submit an edited rancho profile."""
+    current_user = session['user']
+    rancho = ranchos.find_one({'_id': ObjectId(rancho_id)})
+    if ObjectId(current_user['user_id']) != rancho['user_id']:
+        return render_template('go_back.html', current_user=current_user)
+
     updated_prof = {
         'name': request.form.get('rancho_name'),
         'bio': request.form.get('description')
@@ -471,11 +534,19 @@ def ranchos_update(rancho_id):
 
 
 @app.route('/ranchos/<rancho_id>/release', methods=['POST'])
+@login_required
 def ranchos_delete(rancho_id):
     """Release (delete) one Rancho."""
-    ranchos.delete_one({'_id': ObjectId(rancho_id)})
-    return redirect(url_for('listings_home'))
+    current_user = session['user']
+    rancho = ranchos.find_one({'_id': ObjectId(rancho_id)})
 
+    if ObjectId(current_user['user_id']) != rancho['user_id']:
+        return render_template('go_back.html', current_user=current_user)
+
+    ranchos.delete_one({'_id': ObjectId(rancho_id)})
+
+    return redirect(url_for('users_show',
+                            user_id=rancho.get('user_id')))
 
 # ---------------------------COMMENTS---------------------------
 @app.route('/listings/comments', methods=['POST'])

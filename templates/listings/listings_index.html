@@ -38,7 +38,7 @@
               {% if listing.created_at %}
                 <td>
                     {{ listing.created_at.strftime('%I:%M %p') }}
-                    {{ listing.created_at.strftime('%d/%m/%y') }}
+                    {{ listing.created_at.strftime('%m/%d/%y') }}
                 </td>
               {% endif %}
             </tr>
