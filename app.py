@@ -342,7 +342,7 @@ def adoption_center():
             'species': choice(rancho_species),
             'sex': choice(rancho_sex),
             'stats': {
-                'health': randint(1, 100),
+                'hardiness': randint(1, 100),
                 'dexterity': randint(1, 100),
                 'docility': randint(1, 100),
                 'conformation': randint(1, 100),
@@ -362,10 +362,19 @@ def ranchos_new():
     """Submit a new Rancho."""
     current_user = session['user']
     stats = {
-        'health': request.form.get('health'),
+        'hardiness': request.form.get('hardiness'),
         'dexterity': request.form.get('dexterity'),
         'docility': request.form.get('docility'),
         'conformation': request.form.get('conformation')
+    }
+    needs = {
+        'food': 100,
+        'water': 100,
+        'health': 100,
+        'happiness': 100,
+        'last_cared': datetime.now(),
+        'cared_by': current_user['username'],
+        'cared_by_id': ObjectId(current_user['user_id'])
     }
     rancho = {
         'name': 'New Rancho',
@@ -373,6 +382,7 @@ def ranchos_new():
         'xp': 1000,
         'level': level_calc(1000),
         'stats': stats,
+        'needs': needs,
         'species': request.form.get('species'),
         'sex': request.form.get('sex'),
         'user_id': ObjectId(current_user['user_id'])
@@ -390,6 +400,40 @@ def ranchos_show(rancho_id):
     rancho = ranchos.find_one({'_id': ObjectId(rancho_id)})
     return render_template('ranchos/ranchos_show.html', rancho=rancho,
                            current_user=current_user)
+
+
+@app.route('/ranchos/<rancho_id>/care')
+@login_required
+def ranchos_care(rancho_id):
+    """Care for a Rancho."""
+    current_user = session['user']
+    rancho = ranchos.find_one({'_id': ObjectId(rancho_id)})
+
+    timediff = datetime.now() - rancho['needs']['last_cared']
+    if timediff.days >= 1:
+        # Been more than a day since last cared for
+        new_health = rancho['needs']['health'] + 50
+        if new_health > 100:
+            new_health = 100
+
+        new_needs = {
+            'food': 100,
+            'water': 100,
+            'health': new_health,
+            'happiness': 100,
+            'last_cared': datetime.now(),
+            'cared_by': current_user['username'],
+            'cared_by_id': ObjectId(current_user['user_id'])
+        }
+
+        ranchos.update_one(
+            {'_id': ObjectId(rancho_id)},
+            {'$set': {'needs': new_needs}})
+    # Can care for other people's Ranchos
+    # if ObjectId(current_user['user_id']) != rancho['user_id']:
+    #     return render_template('go_back.html', current_user=current_user)
+
+    return redirect(url_for('ranchos_show', rancho_id=rancho_id))
 
 
 @app.route('/ranchos/<rancho_id>/edit')
