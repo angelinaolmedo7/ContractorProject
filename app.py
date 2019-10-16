@@ -9,6 +9,7 @@ from functools import wraps
 from bson import json_util
 from bson.json_util import loads, dumps
 import json
+from lvl_calc import level_calc
 
 host = os.environ.get('MONGODB_URI', 'mongodb://127.0.0.1:27017/RanchoStop')
 client = MongoClient(host=f'{host}?retryWrites=false')
@@ -355,12 +356,13 @@ def adoption_center():
 @app.route('/ranchos/new', methods=['POST'])
 @login_required
 def ranchos_new():
-    """Submit a new comment."""
+    """Submit a new Rancho."""
     current_user = session['user']
     rancho = {
         'name': 'New Rancho',
         'bio': request.form.get('sex') + ' ' + request.form.get('species'),
-        'level': 1,
+        'xp': 1000,
+        'level': level_calc(1000),
         'species': request.form.get('species'),
         'sex': request.form.get('sex'),
         'health': request.form.get('health'),
