@@ -108,7 +108,7 @@ def logout():
 # ---------------------------USERS---------------------------
 @app.route('/users/new')
 def users_new():
-    """Return a user creation page with starter Ranchos."""
+    """Return a user creation page."""
     if 'user' in session:
         current_user = session['user']
         return render_template('users/logged_in.html',
@@ -234,7 +234,7 @@ def users_show(user_id):
         current_user = session['user']
 
     user = users.find_one({'_id': ObjectId(user_id)})
-    print(user['crikits'])
+    # print(user['crikits'])
 
     user_ranchos = ranchos.find({'user_id': ObjectId(user_id)})
     return render_template('users/users_show.html', user=user,
@@ -367,7 +367,7 @@ def listings_delete(listing_id):
     return redirect(url_for('listings_home'))
 
 
-# -------------------------RANCHOS (NOT IMPLEMENTED)-------------------------
+# -------------------------RANCHOS-------------------------
 @app.route('/ranchos/adoption_center')
 @login_required
 def adoption_center():
@@ -640,6 +640,101 @@ def comments_delete(comment_id):
     comments.delete_one({'_id': ObjectId(comment_id)})
     return redirect(url_for('listings_show',
                             listing_id=comment.get('listing_id')))
+
+
+# ---------------------------HATCHERIES---------------------------
+@app.route('/hatcheries/new')
+@login_required
+def hatcheries_new():
+    """Return a hatchery creation page."""
+    current_user = session['user']
+    return render_template('hatcheries/new_hatchery.html', current_user=current_user)
+
+
+@app.route('/hatcheries/my_hatcheries')
+@login_required
+def my_hatcheries():
+    """Return a list of hatcheries belonging to the user."""
+    current_user = session['user']
+
+    return render_template('hatcheries/my_hatcheries.html',
+                           hatcheries=hatcheries.find({
+                               'user_id': current_user['user_id']
+                               }),
+                           current_user=current_user)
+
+
+@app.route('/hatcheries', methods=['POST'])
+@login_required
+def hatcheries_submit():
+    """Submit a new hatchery pairing."""
+    current_user = session['user']
+    a_user = users.find_one({'_id': ObjectId(current_user['user_id'])})
+
+    mother = ranchos.find_one({'_id': ObjectId(request.form.get('mother'))})
+    father = ranchos.find_one({'_id': ObjectId(request.form.get('father'))})
+
+    hatchery = {
+        'mother_name': mother['name'],
+        'mother_id': mother['_id'],
+        'father_name': father['name'],
+        'father_id': father['_id'],
+        'created_at': datetime.now(),
+        'owner': a_user['username'],
+        'user_id': a_user['_id']
+    }
+
+    hatchery_id = hatcheries.insert_one(hatchery).inserted_id
+
+    return redirect(url_for('hatcheries_show', hatchery_id=hatchery_id))
+
+
+@app.route('/hatcheries/<hatchery_id>')
+def hatcheries_show(hatchery_id):
+    """Show a single hatchery page."""
+
+    current_user = None
+    if 'user' in session:
+        current_user = session['user']
+
+    hatchery = hatcheries.find_one({'_id': ObjectId(hatchery_id)})
+
+    ready_to_hatch = False
+    timediff = datetime.now() - hatchery['created_at']
+    if timediff.days >= 2:
+        ready_to_hatch = True
+
+    return render_template('hatcheries/hatcheries_show.html',
+                           hatchery=hatchery,
+                           current_user=current_user)
+
+
+@app.route('/hatcheries/<hatchery_id>/hatch', methods=['POST'])
+@login_required
+def hatchery_hatch(hatchery_id):
+    """Hatch a brood and move record of the pairing to brood db."""
+    current_user = session['user']
+    hatchery = hatcheries.find_one({'_id': ObjectId(hatchery_id)})
+
+    if ObjectId(current_user['user_id']) != ObjectId(hatchery['user_id']):
+        error = {
+        'error_message': "You don't own these Ranchos!",
+        'error_link': f'/hatcheries/{hatchery_id}',
+        'back_message': 'Back to hatchery?'
+        }
+        return render_template('error_message.html', error=error, current_user=current_user)
+
+    timediff = datetime.now() - hatchery['created_at']
+    if timediff.days < 2:
+        error = {
+        'error_message': "This brood is not ready to hatch.",
+        'error_link': f'/hatcheries/{hatchery_id}',
+        'back_message': 'Back to hatchery?'
+        }
+        return render_template('error_message.html', error=error, current_user=current_user)
+
+    #logic for baby generation here
+    return redirect(url_for('users_directory'))
 
 
 if __name__ == '__main__':
