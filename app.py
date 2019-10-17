@@ -45,13 +45,19 @@ def login_required(f):
 # ---------------------------HOME---------------------------
 @app.route('/')
 def home():
-    """Return listings homepage."""
+    """Return homepage."""
     current_user = None
     if 'user' in session:
         current_user = session['user']
 
         # print(current_user)
     return render_template('home.html', current_user=current_user)
+
+
+@app.route('/home')
+def home_page_redirect():
+    """Redirect to homepage."""
+    return redirect(url_for('home'))
 
 
 # ---------------------------LOGIN/OUT---------------------------
@@ -119,7 +125,7 @@ def users_directory():
     for user in users.find():
         users.update_one(
             {'_id': ObjectId(user['_id'])},
-            {'$set': {'crikits': 200}})
+            {'$set': {'crikits': 200, 'last_paid': datetime.now()}})
 
     return render_template('users/users_directory.html', users=users.find(),
                            current_user=current_user)
@@ -141,7 +147,8 @@ def users_submit():
         'password': request.form.get('password'),
         'bio': request.form.get('content'),
         'created_at': datetime.now(),
-        'crikits': 200
+        'crikits': 200,
+        'last_paid': datetime.now()
     }
 
     user_id = users.insert_one(user).inserted_id
@@ -172,6 +179,30 @@ def users_edit(user_id):
     return render_template('users/users_edit.html', user=user,
                            title='Edit User Profile',
                            current_user=current_user)
+
+
+@app.route('/daily_crikits')
+@login_required
+def daily_crikits():
+    """Pay daily 25 crikits."""
+    current_user = session['user']
+    usid = current_user['user_id']
+
+    a_user = users.find_one({'_id': ObjectId(current_user['user_id'])})
+    timediff = datetime.now() - a_user['last_paid']
+    if timediff.days >= 1:
+        new_balance = a_user['crikits'] + 25
+        users.update_one(
+            {'_id': ObjectId(current_user['user_id'])},
+            {'$set': {'crikits': new_balance, 'last_paid': datetime.now()}})
+        return redirect(url_for('users_show', user_id=usid))
+
+    error = {
+        'error_message': "You've already claimed your daily reward in the last 24 hours.",
+        'error_link': '/',
+        'back_message': 'Back to home?'
+    }
+    return render_template('error_message.html', error=error, current_user=current_user)
 
 
 @app.route('/users/<user_id>', methods=['POST'])
