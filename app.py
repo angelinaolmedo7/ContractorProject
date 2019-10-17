@@ -127,6 +127,12 @@ def users_directory():
     #     users.update_one(
     #         {'_id': ObjectId(user['_id'])},
     #         {'$set': {'crikits': 200, 'last_paid': datetime.now()}})
+    for rancho in ranchos.find():
+        rancho_owner = users.find({'_id': ObjectId(rancho['user_id'])})
+        ranchos.update_one(
+            {'_id': ObjectId(rancho['_id'])},
+            {'$set': {'owner': rancho_owner['username']}}
+        )
 
     return render_template('users/users_directory.html', users=users.find(),
                            current_user=current_user)
@@ -510,7 +516,8 @@ def ranchos_show(rancho_id):
             {'$set': {'needs': new_needs}}
             )
 
-    return render_template('ranchos/ranchos_show.html', rancho=rancho,
+    return render_template('ranchos/ranchos_show.html',
+                           rancho=ranchos.find_one({'_id': ObjectId(rancho_id)}),
                            current_user=current_user)
 
 
@@ -657,10 +664,22 @@ def my_hatcheries():
     """Return a list of hatcheries belonging to the user."""
     current_user = session['user']
 
+    for rancho in ranchos.find({'user_id': current_user['user_id']}):
+        print(rancho['name'])
+
+
     return render_template('hatcheries/my_hatcheries.html',
                            hatcheries=hatcheries.find({
-                               'user_id': current_user['user_id']
+                               'user_id': ObjectId(current_user['user_id'])
                                }),
+                           f_ranchos=ranchos.find({
+                               'user_id': ObjectId(current_user['user_id']),
+                               'sex': 'Female'
+                           }),
+                           m_ranchos=ranchos.find({
+                               'user_id': ObjectId(current_user['user_id']),
+                               'sex': 'Male'
+                           }),
                            current_user=current_user)
 
 
@@ -698,6 +717,8 @@ def hatcheries_show(hatchery_id):
         current_user = session['user']
 
     hatchery = hatcheries.find_one({'_id': ObjectId(hatchery_id)})
+    mother = ranchos.find_one({'_id': ObjectId(hatchery['mother_id'])})
+    father = ranchos.find_one({'_id': ObjectId(hatchery['father_id'])})
 
     ready_to_hatch = False
     timediff = datetime.now() - hatchery['created_at']
@@ -706,6 +727,8 @@ def hatcheries_show(hatchery_id):
 
     return render_template('hatcheries/hatcheries_show.html',
                            hatchery=hatchery,
+                           mother=mother,
+                           father=father,
                            current_user=current_user)
 
 

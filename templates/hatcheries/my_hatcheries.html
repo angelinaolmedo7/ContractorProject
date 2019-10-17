@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<h1>Welcome to your Hatchery</h1>
+        {% if hatcheries.count() == 0 %}
+            {% include 'hatcheries/new_hatchery_form.html' %}
+        {% else %}
+            {% for hatchery in hatcheries %}
+                {% include 'hatcheries/hatchery_container.html' %}
+            {% endfor %}
+        {% endif %}
+{% endblock %}

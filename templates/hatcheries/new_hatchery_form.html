@@ -1,0 +1,35 @@
+<p>You don't have any active hatcheries.</p>
+
+<form method='POST' action='/hatcheries'>
+    <fieldset>
+        <!-- MOTHER -->
+        <div class='row'>
+        <div class='col-sm-6'>
+            <div class='form-group'>
+                <label for='title'>Select Mother:</label><br>
+                <select class="custom-select" id='mother' name='mother'>
+                    {% for f_rancho in f_ranchos %}
+                    <option value="{{ f_rancho._id }}">{{ f_rancho.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <!-- FATHER -->
+        <div class='col-sm-6'>
+            <div class='form-group'>
+                <label for='title'>Select Father:</label><br>
+                <select class="custom-select" id='father' name='father'>
+                    {% for m_rancho in m_ranchos %}
+                    <option value="{{ m_rancho._id }}">{{ m_rancho.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        </div>
+    </fieldset>
+    <!-- BUTTON -->
+    <div class='form-group'>
+        <button class='btn btn-primary' type='submit'>Start new pairing!</button>
+    </div>
+</form>
+</div>

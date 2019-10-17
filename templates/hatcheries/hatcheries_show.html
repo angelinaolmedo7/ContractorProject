@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<a href='/hatcheries/my_hatcheries'>Back to Hatcheries</a>
+<div class='row'>
+    <div class='col-sm-6 col-sm-offset-3'>
+        <h1><a href="/ranchos/{{ mother._id }}">{{ mother.name }}</a> x <a href="/ranchos/{{ father._id }}">{{ father.name }}</a></h1>
+        <p class='text-muted'>Paired on {{ hatchery.created_at.strftime('%A, %B %d, %Y at %I:%M %p') }}</p>
+        <h2>{{ mother.species }}</h2>
+    </div>
+</div>
+<div class='row'>
+    <div class='col-sm-6 col-sm-offset-3'>
+            <!-- MOTHER -->
+            {% with rancho=mother %}
+                {% include 'ranchos/stat_table.html' %}
+            {% endwith %}
+    </div>
+    <div class='col-sm-6 col-sm-offset-3'>
+            <!-- FATHER -->
+            {% with rancho=father %}
+                {% include 'ranchos/stat_table.html' %}
+            {% endwith %}
+    </div>
+</div>
+
+{% endblock %}
