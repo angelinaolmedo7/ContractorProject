@@ -1,0 +1,7 @@
+<div class="jumbotron">
+    <h1 class="display-3"><a href="/ranchos/{{ hatchery.mother_id }}">{{ hatchery.mother_name }}</a> x <a href="/ranchos/{{ hatchery.father_id }}">{{ hatchery.father_name }}</a></h1>
+    <p class="lead">Paired on {{ hatchery.created_at.strftime('%A, %B %d, %Y at %I:%M %p') }}</p>
+    <p class="lead">
+        <a class="btn btn-primary btn-lg" href="/hatcheries/{{ hatchery._id }}" role="button">Visit Hatchery</a>
+    </p>
+</div>
