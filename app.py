@@ -18,6 +18,7 @@ users = db.users
 ranchos = db.ranchos
 listings = db.listings
 comments = db.comments
+hatcheries = db.hatcheries
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'THISISMYSECRETKEY'
