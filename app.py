@@ -122,10 +122,10 @@ def users_directory():
     if 'user' in session:
         current_user = session['user']
 
-    for user in users.find():
-        users.update_one(
-            {'_id': ObjectId(user['_id'])},
-            {'$set': {'crikits': 200, 'last_paid': datetime.now()}})
+    # for user in users.find():
+    #     users.update_one(
+    #         {'_id': ObjectId(user['_id'])},
+    #         {'$set': {'crikits': 200, 'last_paid': datetime.now()}})
 
     return render_template('users/users_directory.html', users=users.find(),
                            current_user=current_user)
