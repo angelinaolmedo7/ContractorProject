@@ -9,6 +9,7 @@
         {% if user.created_at %}
         <p class='text-muted'>Joined site on {{ user.created_at.strftime('%A, %B %d, %Y at %I:%M %p') }}</p>
         {% endif %}
+        <p>¢{{ user.crikits }}</p>
         <p>{{ user.bio }}</p>
 
         <p>

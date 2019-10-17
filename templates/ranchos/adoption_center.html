@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 
 {% block body %}
+<h1>Welcome to the RanchoStop Adoption Center</h1>
+<p>You have: ¢{{ user_crikits }}</p>
 <div class='row'>
     <div class='col-sm-6 col-sm-offset-3'>
         {% for rancho in ranchos_list %}
@@ -15,7 +17,7 @@
                 {% include 'partials/rancho_card.html' %}
                 <!-- BUTTON -->
                 <div class='form-group'>
-                    <button class='btn btn-primary' type='submit'>Adopt me!</button>
+                    <button class='btn btn-primary' type='submit'>Adopt me! ¢50</button>
                 </div>
             </form>
             <br>

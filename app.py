@@ -115,6 +115,12 @@ def users_directory():
     current_user = None
     if 'user' in session:
         current_user = session['user']
+
+    for user in users.find():
+        users.update_one(
+            {'_id': ObjectId(user['_id'])},
+            {'$set': {'crikits': 200}})
+
     return render_template('users/users_directory.html', users=users.find(),
                            current_user=current_user)
 
@@ -135,6 +141,7 @@ def users_submit():
         'password': request.form.get('password'),
         'bio': request.form.get('content'),
         'created_at': datetime.now(),
+        'crikits': 200
     }
 
     user_id = users.insert_one(user).inserted_id
@@ -195,6 +202,7 @@ def users_show(user_id):
         current_user = session['user']
 
     user = users.find_one({'_id': ObjectId(user_id)})
+    print(user['crikits'])
 
     user_ranchos = ranchos.find({'user_id': ObjectId(user_id)})
     return render_template('users/users_show.html', user=user,
@@ -351,9 +359,12 @@ def adoption_center():
         }
         ranchos_list.append(rancho)
 
+    user_crikits = users.find_one({'username': current_user['username']})['crikits']
+
     return render_template('ranchos/adoption_center.html',
                            ranchos_list=ranchos_list,
-                           current_user=current_user)
+                           current_user=current_user,
+                           user_crikits=user_crikits)
 
 
 @app.route('/ranchos/new', methods=['POST'])
@@ -361,6 +372,16 @@ def adoption_center():
 def ranchos_new():
     """Submit a new Rancho."""
     current_user = session['user']
+
+    a_user = users.find_one({'_id': ObjectId(current_user['user_id'])})
+    new_balance = a_user['crikits'] - 50
+    if new_balance < 0:
+        return render_template('go_back.html', current_user=current_user) 
+    users.update_one(
+        {'_id': ObjectId(current_user['user_id'])},
+        {'$set': {'crikits': new_balance}})
+
+
     stats = {
         'hardiness': request.form.get('hardiness'),
         'dexterity': request.form.get('dexterity'),
@@ -389,6 +410,7 @@ def ranchos_new():
         'user_id': ObjectId(current_user['user_id'])
     }
     rancho_id = ranchos.insert_one(rancho).inserted_id
+
     return redirect(url_for('ranchos_edit', rancho_id=rancho_id))
 
 
@@ -545,6 +567,12 @@ def ranchos_delete(rancho_id):
         return render_template('go_back.html', current_user=current_user)
 
     ranchos.delete_one({'_id': ObjectId(rancho_id)})
+
+    a_user = users.find_one({'_id': ObjectId(current_user['user_id'])})
+    new_balance = a_user['crikits'] + 25
+    users.update_one(
+        {'_id': ObjectId(current_user['user_id'])},
+        {'$set': {'crikits': new_balance}})
 
     return redirect(url_for('users_show',
                             user_id=rancho.get('user_id')))
