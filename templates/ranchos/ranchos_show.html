@@ -9,6 +9,14 @@
         {% if rancho.adopted_at %}
         <p class='text-muted'>Adopted on {{ rancho.adopted_at.strftime('%A, %B %d, %Y at %I:%M %p') }}</p>
         {% endif %}
+        {% if rancho.hatched_at %}
+        <p class='text-muted'>Hatched on {{ rancho.hatched_at.strftime('%A, %B %d, %Y at %I:%M %p') }} to parents 
+            <a href="/ranchos/{{ rancho['ancestry'].mother_id }}">{{ rancho['ancestry'].mother_name }}</a>
+             and 
+            <a href="/ranchos/{{ rancho['ancestry'].father_id }}">{{ rancho['ancestry'].father_name }}</a>. 
+            <a href="/broods/{{ rancho['brood_id'] }}">View brood?</a>
+        </p>
+        {% endif %}
         <h2>Lvl.{{ rancho.level }} {{ rancho.sex }} {{ rancho.species }}</h2>
         <p>{{ rancho.bio }}</p>
         <p>
