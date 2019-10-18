@@ -445,6 +445,7 @@ def ranchos_new():
         'needs': needs,
         'species': request.form.get('species'),
         'sex': request.form.get('sex'),
+        'owner': current_user['username'],
         'user_id': ObjectId(current_user['user_id'])
     }
     rancho_id = ranchos.insert_one(rancho).inserted_id
@@ -662,7 +663,7 @@ def hatcheries_new():
 @app.route('/hatcheries/my_hatcheries')
 @login_required
 def my_hatcheries():
-    """Return a list of hatcheries belonging to the user."""
+    """Return a list of hatcheries extant broods belonging to the user."""
     current_user = session['user']
 
     for rancho in ranchos.find({'user_id': current_user['user_id']}):
@@ -670,6 +671,9 @@ def my_hatcheries():
 
     return render_template('hatcheries/my_hatcheries.html',
                            hatcheries=hatcheries.find({
+                               'user_id': ObjectId(current_user['user_id'])
+                               }),
+                           broods=broods.find({
                                'user_id': ObjectId(current_user['user_id'])
                                }),
                            f_ranchos=ranchos.find({
@@ -692,6 +696,15 @@ def hatcheries_submit():
 
     mother = ranchos.find_one({'_id': ObjectId(request.form.get('mother'))})
     father = ranchos.find_one({'_id': ObjectId(request.form.get('father'))})
+
+    if not check_compatible(mother, father):
+        error = {
+            'error_message': "These Ranchos are incompatible.",
+            'error_link': f'/hatcheries/my_hatcheries',
+            'back_message': 'Back to hatchery?'
+        }
+        return render_template('error_message.html', error=error,
+                               current_user=current_user)
 
     hatchery = {
         'mother_name': mother['name'],
@@ -766,6 +779,8 @@ def hatchery_hatch(hatchery_id):
         'mother_id': hatchery['mother_id'],
         'father_name': hatchery['father_name'],
         'father_id': hatchery['father_id'],
+        'breeder': hatchery['owner'],
+        'user_id': hatchery['user_id'],
         'species': mother['species'],
         'hatchling_ids': hatchling_ids,
         'hatched_at': datetime.now()}
@@ -781,6 +796,50 @@ def hatchery_hatch(hatchery_id):
 
     return redirect(url_for('broods_show',
                             brood_id=brood_id))
+
+                        
+def check_compatible(mother, father):
+    """Return true if the pairing is compatible."""
+    # father is male and mother is female
+    if mother['sex'] == father['sex']:
+        return False
+    # different species
+    if mother['species'] != father['species']:
+        return False
+    # related
+    if 'ancestry' in mother.keys():
+        if mother['ancestry']['father_id'] == father['_id']:
+            return False  
+        if 'ancestry' in father.keys():
+            if mother['ancestry']['mother_id'] == father['ancestry']['mother_id']:
+                return False
+            if mother['ancestry']['father_id'] == father['ancestry']['father_id']:
+                return False
+    if 'ancestry' in father.keys():
+        if father['ancestry']['mother_id'] == mother['_id']:
+            return False  
+    # already breeding
+    if hatcheries.find({'mother_id': mother['_id']}).count() > 0:
+        return False
+    if hatcheries.find({'father_id': father['_id']}).count() > 0:
+        return False
+    # both owned by current_user
+    current_user = session['user']
+    if mother['user_id'] != father['user_id']:
+        return False
+    if str(mother['user_id']) != str(current_user['user_id']):
+        return False
+    # level 3+
+    if int(mother['level']) < 3:
+        return False
+    if int(father['level']) < 3:
+        return False
+    # full health
+    if int(mother['needs']['health']) < 100:
+        return False
+    return True
+
+    
 
 
 def generate_hatchlings(mother, father):

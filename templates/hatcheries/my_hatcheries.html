@@ -9,4 +9,29 @@
             {% include 'hatcheries/hatchery_container.html' %}
         {% endfor %}
     {% endif %}
+    <div class="row">
+    <div class="col-sm-2"></div>
+    <div class="col-sm-6">
+    {% if broods.count() > 0 %}
+        <h2>Your past broods:</h2>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">Pairing</th>
+                    <th scope="col">Time Hatched</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for brood in broods %}
+                    <tr class="table-light">
+                        <th scope="row"><a href='/broods/{{ brood._id }}'>{{ brood.mother_name }} x {{ brood.father_name }}</a></th>
+                        <td>
+                            {{ brood.hatched_at.strftime('%A, %B %d, %Y at %I:%M %p') }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+    </div></div>
 {% endblock %}
