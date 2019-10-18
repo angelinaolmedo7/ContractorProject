@@ -528,7 +528,7 @@ def ranchos_show(rancho_id):
 
     return render_template('ranchos/ranchos_show.html',
                            rancho=ranchos.find_one({'_id': ObjectId(rancho_id)}),
-                           broods=broods.find({ '$or': [{'mother_id': ObjectId(rancho_id)}, {'father_id': ObjectId(rancho_id)}]}),
+                           broods=broods.find({'$or': [{'mother_id': ObjectId(rancho_id)}, {'father_id': ObjectId(rancho_id)}]}),
                            current_user=current_user)
 
 
@@ -637,7 +637,6 @@ def ranchos_update(rancho_id):
             {'_id': ObjectId(hatchery['_id'])},
             {'$set': {'father_name': rancho['name']}})
 
-
     return redirect(url_for('ranchos_show', rancho_id=rancho_id))
 
 
@@ -651,6 +650,21 @@ def ranchos_delete(rancho_id):
     # correct owner
     if ObjectId(current_user['user_id']) != rancho['user_id']:
         return render_template('go_back.html', current_user=current_user)
+
+    # not currenly breeding
+    if hatcheries.find(
+        {'$or': [
+            {'mother_id': ObjectId(rancho_id)},
+            {'father_id': ObjectId(rancho_id)}
+            ]}
+            ).count() > 0:
+        error = {
+                'error_message': "That Rancho cannot be released because it is currently breeding.",
+                'error_link': f'/ranchos/{ rancho_id }',
+                'back_message': 'Back to Rancho?'
+            }
+        return render_template('error_message.html', error=error,
+                               current_user=current_user)
 
     ranchos.delete_one({'_id': ObjectId(rancho_id)})
 
@@ -843,7 +857,7 @@ def hatchery_hatch(hatchery_id):
     return redirect(url_for('broods_show',
                             brood_id=brood_id))
 
-                        
+
 def check_compatible(mother, father):
     """Return true if the pairing is compatible."""
     # father is male and mother is female
@@ -855,7 +869,7 @@ def check_compatible(mother, father):
     # related
     if 'ancestry' in mother.keys():
         if mother['ancestry']['father_id'] == father['_id']:
-            return False  
+            return False
         if 'ancestry' in father.keys():
             if mother['ancestry']['mother_id'] == father['ancestry']['mother_id']:
                 return False
@@ -863,7 +877,7 @@ def check_compatible(mother, father):
                 return False
     if 'ancestry' in father.keys():
         if father['ancestry']['mother_id'] == mother['_id']:
-            return False  
+            return False
     # already breeding
     if hatcheries.find({'mother_id': mother['_id']}).count() > 0:
         return False
@@ -885,7 +899,7 @@ def check_compatible(mother, father):
         return False
     return True
 
-    
+
 
 
 def generate_hatchlings(mother, father):

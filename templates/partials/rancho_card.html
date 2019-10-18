@@ -1,30 +1,34 @@
 <div class="card border-secondary mb-3" style="max-width: 20rem;">
-  {% if rancho.name %}
-    <div class="card-header"><a href='/ranchos/{{ rancho._id }}'>{{ rancho.name }}</a></div>
+  {% if rancho != None %}
+    {% if rancho.name %}
+      <div class="card-header"><a href='/ranchos/{{ rancho._id }}'>{{ rancho.name }}</a></div>
+    {% endif %}
+    <div class="card-header">{{ rancho.sex }} {{ rancho.species }}</div>
+    <div class="card-body">
+      <h4 class="card-title">Stats</h4>
+
+      <div class="progress">
+          <div class="progress-bar" role="progressbar" style="width: {{ rancho['stats'].hardiness }}%;" aria-valuenow="{{ rancho['stats'].hardiness }}" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>
+      <p class="card-text">Hardiness: {{ rancho['stats'].hardiness }}/100</p>
+
+      <div class="progress">
+          <div class="progress-bar" role="progressbar" style="width: {{ rancho['stats'].dexterity }}%;" aria-valuenow="{{ rancho['stats'].dexterity }}" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>
+      <p class="card-text">Speed: {{ rancho['stats'].dexterity }}/100</p>
+
+      <div class="progress">
+          <div class="progress-bar" role="progressbar" style="width: {{ rancho['stats'].docility }}%;" aria-valuenow="{{ rancho['stats'].docility }}" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>
+      <p class="card-text">Docility: {{ rancho['stats'].docility }}/100</p>
+
+      <div class="progress">
+          <div class="progress-bar" role="progressbar" style="width: {{ rancho['stats'].conformation }}%;" aria-valuenow="{{ rancho['stats'].conformation }}" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>
+      <p class="card-text">Conformation: {{ rancho['stats'].conformation }}/100</p>
+
+    </div>
+  {% else %}
+  <p>This Rancho was not found. It may have been released.</p> 
   {% endif %}
-  <div class="card-header">{{ rancho.sex }} {{ rancho.species }}</div>
-  <div class="card-body">
-    <h4 class="card-title">Stats</h4>
-
-    <div class="progress">
-        <div class="progress-bar" role="progressbar" style="width: {{ rancho['stats'].hardiness }}%;" aria-valuenow="{{ rancho['stats'].hardiness }}" aria-valuemin="0" aria-valuemax="100"></div>
-    </div>
-    <p class="card-text">Hardiness: {{ rancho['stats'].hardiness }}/100</p>
-
-    <div class="progress">
-        <div class="progress-bar" role="progressbar" style="width: {{ rancho['stats'].dexterity }}%;" aria-valuenow="{{ rancho['stats'].dexterity }}" aria-valuemin="0" aria-valuemax="100"></div>
-    </div>
-    <p class="card-text">Speed: {{ rancho['stats'].dexterity }}/100</p>
-
-    <div class="progress">
-        <div class="progress-bar" role="progressbar" style="width: {{ rancho['stats'].docility }}%;" aria-valuenow="{{ rancho['stats'].docility }}" aria-valuemin="0" aria-valuemax="100"></div>
-    </div>
-    <p class="card-text">Docility: {{ rancho['stats'].docility }}/100</p>
-
-    <div class="progress">
-        <div class="progress-bar" role="progressbar" style="width: {{ rancho['stats'].conformation }}%;" aria-valuenow="{{ rancho['stats'].conformation }}" aria-valuemin="0" aria-valuemax="100"></div>
-    </div>
-    <p class="card-text">Conformation: {{ rancho['stats'].conformation }}/100</p>
-
-  </div>
 </div>
