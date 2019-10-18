@@ -6,29 +6,34 @@
 <div class='row'>
     <div class='col-sm-6 col-sm-offset-3'>
         <h1><a href="/ranchos/{{ mother._id }}">{{ mother.name }}</a> x <a href="/ranchos/{{ father._id }}">{{ father.name }}</a></h1>
-        <p class='text-muted'>Paired on {{ hatchery.created_at.strftime('%A, %B %d, %Y at %I:%M %p') }}</p>
-        <h2>{{ mother.species }}</h2>
-        {% if ready %}
-            <!-- HATCH -->
-            <form method='POST' action='/hatcheries/{{ hatchery._id }}/hatch'>
-                <button type="submit" class="btn btn-primary">Hatch!</button>
-            </form>
-            </br>
-        {% endif %}
+        <p class='text-muted'>Hatched on {{ brood.hatched_at.strftime('%A, %B %d, %Y at %I:%M %p') }}</p>
+        <h2>{{ brood.species }}</h2>
     </div>
 </div>
 <div class='row'>
     <div class='col-sm-6 col-sm-offset-3'>
             <!-- MOTHER -->
+            <h2>Mother</h2>
             {% with rancho=mother %}
                 {% include 'ranchos/stat_table.html' %}
             {% endwith %}
     </div>
     <div class='col-sm-6 col-sm-offset-3'>
             <!-- FATHER -->
+            <h2>Father</h2>
             {% with rancho=father %}
                 {% include 'ranchos/stat_table.html' %}
             {% endwith %}
+    </div>
+</div>
+<div class='row'>
+    <div class='col-sm-6 col-sm-offset-3'>
+        <h2>Hatchlings</h2>
+        {% for hatchling in hatchlings %}
+            {% with rancho=hatchling %}
+                {% include 'partials/rancho_card.html' %}
+            {% endwith %}
+        {% endfor %}
     </div>
 </div>
 

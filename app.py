@@ -19,6 +19,7 @@ ranchos = db.ranchos
 listings = db.listings
 comments = db.comments
 hatcheries = db.hatcheries
+broods = db.broods
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'THISISMYSECRETKEY'
@@ -128,7 +129,7 @@ def users_directory():
     #         {'_id': ObjectId(user['_id'])},
     #         {'$set': {'crikits': 200, 'last_paid': datetime.now()}})
     for rancho in ranchos.find():
-        rancho_owner = users.find({'_id': ObjectId(rancho['user_id'])})
+        rancho_owner = users.find_one({'_id': ObjectId(rancho['user_id'])})
         ranchos.update_one(
             {'_id': ObjectId(rancho['_id'])},
             {'$set': {'owner': rancho_owner['username']}}
@@ -388,10 +389,10 @@ def adoption_center():
             'species': choice(rancho_species),
             'sex': choice(rancho_sex),
             'stats': {
-                'hardiness': randint(1, 100),
-                'dexterity': randint(1, 100),
-                'docility': randint(1, 100),
-                'conformation': randint(1, 100),
+                'hardiness': randint(0, 100),
+                'dexterity': randint(0, 100),
+                'docility': randint(0, 100),
+                'conformation': randint(0, 100),
             },
             'created_at': datetime.now()
         }
@@ -414,11 +415,10 @@ def ranchos_new():
     a_user = users.find_one({'_id': ObjectId(current_user['user_id'])})
     new_balance = a_user['crikits'] - 50
     if new_balance < 0:
-        return render_template('go_back.html', current_user=current_user) 
+        return render_template('go_back.html', current_user=current_user)
     users.update_one(
         {'_id': ObjectId(current_user['user_id'])},
         {'$set': {'crikits': new_balance}})
-
 
     stats = {
         'hardiness': request.form.get('hardiness'),
@@ -655,7 +655,8 @@ def comments_delete(comment_id):
 def hatcheries_new():
     """Return a hatchery creation page."""
     current_user = session['user']
-    return render_template('hatcheries/new_hatchery.html', current_user=current_user)
+    return render_template('hatcheries/new_hatchery.html',
+                           current_user=current_user)
 
 
 @app.route('/hatcheries/my_hatcheries')
@@ -666,7 +667,6 @@ def my_hatcheries():
 
     for rancho in ranchos.find({'user_id': current_user['user_id']}):
         print(rancho['name'])
-
 
     return render_template('hatcheries/my_hatcheries.html',
                            hatcheries=hatcheries.find({
@@ -711,7 +711,6 @@ def hatcheries_submit():
 @app.route('/hatcheries/<hatchery_id>')
 def hatcheries_show(hatchery_id):
     """Show a single hatchery page."""
-
     current_user = None
     if 'user' in session:
         current_user = session['user']
@@ -722,13 +721,14 @@ def hatcheries_show(hatchery_id):
 
     ready_to_hatch = False
     timediff = datetime.now() - hatchery['created_at']
-    if timediff.days >= 2:
+    if timediff.days >= 0:
         ready_to_hatch = True
 
     return render_template('hatcheries/hatcheries_show.html',
                            hatchery=hatchery,
                            mother=mother,
                            father=father,
+                           ready=ready_to_hatch,
                            current_user=current_user)
 
 
@@ -738,26 +738,178 @@ def hatchery_hatch(hatchery_id):
     """Hatch a brood and move record of the pairing to brood db."""
     current_user = session['user']
     hatchery = hatcheries.find_one({'_id': ObjectId(hatchery_id)})
+    mother = ranchos.find_one({'_id': ObjectId(hatchery['mother_id'])})
+    father = ranchos.find_one({'_id': ObjectId(hatchery['father_id'])})
 
     if ObjectId(current_user['user_id']) != ObjectId(hatchery['user_id']):
         error = {
-        'error_message': "You don't own these Ranchos!",
-        'error_link': f'/hatcheries/{hatchery_id}',
-        'back_message': 'Back to hatchery?'
+            'error_message': "You don't own these Ranchos!",
+            'error_link': f'/hatcheries/{hatchery_id}',
+            'back_message': 'Back to hatchery?'
         }
-        return render_template('error_message.html', error=error, current_user=current_user)
+        return render_template('error_message.html', error=error,
+                               current_user=current_user)
 
     timediff = datetime.now() - hatchery['created_at']
-    if timediff.days < 2:
+    if timediff.days < 0:
         error = {
-        'error_message': "This brood is not ready to hatch.",
-        'error_link': f'/hatcheries/{hatchery_id}',
-        'back_message': 'Back to hatchery?'
+            'error_message': "This brood is not ready to hatch.",
+            'error_link': f'/hatcheries/{hatchery_id}',
+            'back_message': 'Back to hatchery?'
         }
-        return render_template('error_message.html', error=error, current_user=current_user)
+        return render_template('error_message.html', error=error,
+                               current_user=current_user)
 
-    #logic for baby generation here
-    return redirect(url_for('users_directory'))
+    hatchling_ids = generate_hatchlings(mother, father)
+    brood = {
+        'mother_name': hatchery['mother_name'],
+        'mother_id': hatchery['mother_id'],
+        'father_name': hatchery['father_name'],
+        'father_id': hatchery['father_id'],
+        'species': mother['species'],
+        'hatchling_ids': hatchling_ids,
+        'hatched_at': datetime.now()}
+    brood_id = broods.insert_one(brood).inserted_id
+
+    for hatchling_id in hatchling_ids:
+        ranchos.update_one(
+            {'_id': ObjectId(hatchling_id)},
+            {'$set': {'hatched_at': brood['hatched_at'],
+                      'brood_id': brood_id}})
+
+    hatcheries.delete_one({'_id': ObjectId(hatchery_id)})
+
+    return redirect(url_for('broods_show',
+                            brood_id=brood_id))
+
+
+def generate_hatchlings(mother, father):
+    """Return list of new rancho hatchlings based on parents."""
+    egg_count = randint(6, 10)  # 6-10 hatchlings per brood
+    species = mother['species']  # parents should be same species
+    rancho_sexes = ['Male', 'Female']  # pick random from this
+    hatchlings = []  # list will contain the brood's hatchlings
+
+    for count in range(1, egg_count):
+        # Stat generation: between parents' stats, +/-20, 0<= stat<= 100
+        hardiness = randint(
+            min(
+                int(mother['stats']['hardiness']),
+                int(father['stats']['hardiness'])
+            ) - 20,
+            max(
+                int(mother['stats']['hardiness']),
+                int(father['stats']['hardiness'])
+            ) + 20
+        )
+        if hardiness > 100:
+            hardiness = 100
+        elif hardiness < 0:
+            hardiness = 0
+
+        dexterity = randint(
+            min(
+                int(mother['stats']['dexterity']),
+                int(father['stats']['dexterity'])
+            ) - 20,
+            max(
+                int(mother['stats']['dexterity']),
+                int(father['stats']['dexterity'])
+            ) + 20
+        )
+        if dexterity > 100:
+            dexterity = 100
+        elif dexterity < 0:
+            dexterity = 0
+
+        docility = randint(
+            min(
+                int(mother['stats']['docility']),
+                int(father['stats']['docility'])
+            ) - 20,
+            max(
+                int(mother['stats']['docility']),
+                int(father['stats']['docility'])
+            ) + 20
+        )
+        if docility > 100:
+            docility = 100
+        elif docility < 0:
+            docility = 0
+
+        conformation = randint(
+            min(
+                int(mother['stats']['conformation']),
+                int(father['stats']['conformation'])
+            ) - 20,
+            max(
+                int(mother['stats']['conformation']),
+                int(father['stats']['conformation'])
+            ) + 20
+        )
+        if conformation > 100:
+            conformation = 100
+        elif conformation < 0:
+            conformation = 0
+
+        stats = {
+            'hardiness': str(hardiness),
+            'dexterity': str(dexterity),
+            'docility': str(docility),
+            'conformation': str(conformation)
+        }
+        needs = {
+            'food': 100,
+            'water': 100,
+            'health': 100,
+            'happiness': 100,
+            'last_cared': datetime.now(),
+            'cared_by': mother['owner'],
+            'cared_by_id': ObjectId(mother['user_id'])
+        }
+        ancestry = {
+            'mother_name': mother['name'],
+            'mother_id': mother['_id'],
+            'father_name': father['name'],
+            'father_id': father['_id']
+        }
+        rancho_sex = choice(rancho_sexes)
+        rancho = {
+            'name': 'Hatchling Rancho',
+            'bio': rancho_sex + ' ' + species,
+            'xp': 0,
+            'level': 0,
+            'stats': stats,
+            'needs': needs,
+            'ancestry': ancestry,
+            'species': species,
+            'sex': rancho_sex,
+            'owner': mother['owner'],
+            'user_id': ObjectId(mother['user_id'])
+        }
+        rancho_id = ranchos.insert_one(rancho).inserted_id
+        hatchlings.append(rancho_id)
+    return hatchlings
+
+
+# ---------------------------BROODS---------------------------
+@app.route('/broods/<brood_id>')
+def broods_show(brood_id):
+    """Show a single brood page."""
+    current_user = None
+    if 'user' in session:
+        current_user = session['user']
+
+    brood = broods.find_one({'_id': ObjectId(brood_id)})
+    mother = ranchos.find_one({'_id': ObjectId(brood['mother_id'])})
+    father = ranchos.find_one({'_id': ObjectId(brood['father_id'])})
+
+    return render_template('broods/broods_show.html',
+                           brood=brood,
+                           mother=mother,
+                           father=father,
+                           hatchlings=ranchos.find({'brood_id': ObjectId(brood_id)}),
+                           current_user=current_user)
 
 
 if __name__ == '__main__':
