@@ -461,6 +461,15 @@ def ranchos_show(rancho_id):
         current_user = session['user']
     rancho = ranchos.find_one({'_id': ObjectId(rancho_id)})
 
+    if rancho is None:
+        error = {
+            'error_message': "That Rancho was not found. It may have been released.",
+            'error_link': '/',
+            'back_message': 'Back to home?'
+        }
+        return render_template('error_message.html', error=error,
+                               current_user=current_user)
+
     # Update needs
     timediff = datetime.now() - rancho['needs']['last_cared']
     if timediff.days > 0:
@@ -519,6 +528,7 @@ def ranchos_show(rancho_id):
 
     return render_template('ranchos/ranchos_show.html',
                            rancho=ranchos.find_one({'_id': ObjectId(rancho_id)}),
+                           broods=broods.find({ '$or': [{'mother_id': ObjectId(rancho_id)}, {'father_id': ObjectId(rancho_id)}]}),
                            current_user=current_user)
 
 
@@ -593,6 +603,41 @@ def ranchos_update(rancho_id):
     ranchos.update_one(
         {'_id': ObjectId(rancho_id)},
         {'$set': updated_prof})
+
+    # update rancho dict
+    rancho = ranchos.find_one({'_id': ObjectId(rancho_id)})
+
+    # update broods
+    for brood in broods.find({'mother_id': rancho['_id']}):
+        broods.update_one(
+            {'_id': ObjectId(brood['_id'])},
+            {'$set': {'mother_name': rancho['name']}})
+    for brood in broods.find({'father_id': rancho['_id']}):
+        broods.update_one(
+            {'_id': ObjectId(brood['_id'])},
+            {'$set': {'father_name': rancho['name']}})
+
+    # update ancestry
+    for other_rancho in ranchos.find({'ancestry.mother_id': rancho['_id']}):
+        ranchos.update_one(
+            {'_id': ObjectId(other_rancho['_id'])},
+            {'$set': {'ancestry.mother_name': rancho['name']}})
+    for other_rancho in ranchos.find({'ancestry.father_id': rancho['_id']}):
+        ranchos.update_one(
+            {'_id': ObjectId(other_rancho['_id'])},
+            {'$set': {'ancestry.father_name': rancho['name']}})
+
+    # update hatchery
+    for hatchery in hatcheries.find({'mother_id': rancho['_id']}):
+        hatcheries.update_one(
+            {'_id': ObjectId(hatchery['_id'])},
+            {'$set': {'mother_name': rancho['name']}})
+    for hatchery in hatcheries.find({'father_id': rancho['_id']}):
+        hatcheries.update_one(
+            {'_id': ObjectId(hatchery['_id'])},
+            {'$set': {'father_name': rancho['name']}})
+
+
     return redirect(url_for('ranchos_show', rancho_id=rancho_id))
 
 
@@ -603,6 +648,7 @@ def ranchos_delete(rancho_id):
     current_user = session['user']
     rancho = ranchos.find_one({'_id': ObjectId(rancho_id)})
 
+    # correct owner
     if ObjectId(current_user['user_id']) != rancho['user_id']:
         return render_template('go_back.html', current_user=current_user)
 
@@ -616,6 +662,7 @@ def ranchos_delete(rancho_id):
 
     return redirect(url_for('users_show',
                             user_id=rancho.get('user_id')))
+
 
 # ---------------------------COMMENTS---------------------------
 @app.route('/listings/comments', methods=['POST'])
@@ -782,7 +829,6 @@ def hatchery_hatch(hatchery_id):
         'breeder': hatchery['owner'],
         'user_id': hatchery['user_id'],
         'species': mother['species'],
-        'hatchling_ids': hatchling_ids,
         'hatched_at': datetime.now()}
     brood_id = broods.insert_one(brood).inserted_id
 

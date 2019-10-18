@@ -34,5 +34,8 @@
         {% include 'ranchos/stat_table.html' %}
     </div>
 </div>
-
+{% if broods.count() > 0 %}
+        <h2>{{ rancho.name }}'s past broods:</h2>
+        {% include 'broods/broods_table.html' %}
+    {% endif %}
 {% endblock %}
