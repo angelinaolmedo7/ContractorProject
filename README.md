@@ -23,5 +23,5 @@ Start [flask](https://palletsprojects.com/p/flask/):
 ```
 $flask run
 ```
-Direct your browser to the address output in your terminal (usually http://127.0.0.1:5000/)
+Direct your browser to the address output in your terminal (usually http://127.0.0.1:5000/)  
 Have fun!  
