@@ -134,7 +134,7 @@ def users_directory():
         #     {'_id': ObjectId(rancho['_id'])},
         #     {'$set': {'owner': rancho_owner['username']}}
         # )
-        rancho.delete_one({'_id': ObjectId(rancho['_id'])})
+        ranchos.delete_one({'_id': ObjectId(rancho['_id'])})
 
     return render_template('users/users_directory.html', users=users.find(),
                            current_user=current_user)
