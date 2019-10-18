@@ -51,7 +51,8 @@ def home():
     current_user = None
     if 'user' in session:
         current_user = session['user']
-
+        for hatchery in hatcheries.find():
+            hatcheries.delete_one({'_id': ObjectId(hatchery['_id'])})
         # print(current_user)
     return render_template('home.html', current_user=current_user)
 
