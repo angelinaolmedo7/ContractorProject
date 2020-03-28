@@ -4,7 +4,7 @@
 
 <a href='/users/directory'>Back to User Directory</a>
 <div class='row'>
-    <div class='col-sm-6 col-sm-offset-3'>
+    <div class='col-sm-12 col-sm-offset-3'>
         <h1>{{ user.username }}</h1>
         {% if user.created_at %}
         <p class='text-muted'>Joined site on {{ user.created_at.strftime('%A, %B %d, %Y at %I:%M %p') }}</p>
@@ -15,11 +15,12 @@
         <p>
             <a href='/users/{{ user._id }}/edit'>Edit</a>
         </p>
-
-        {% for rancho in ranchos %}
-            {% include 'partials/rancho_card.html' %}
-        {% endfor %}
     </div>
+    {% for rancho in ranchos %}
+    <div class='col-sm-4 col-sm-offset-3'>
+        {% include 'partials/rancho_card.html' %}
+    </div>
+    {% endfor %}
 </div>
 
 {% endblock %}
