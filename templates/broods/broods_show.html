@@ -26,15 +26,16 @@
             {% endwith %}
     </div>
 </div>
+
+<h2>Hatchlings</h2>
 <div class='row'>
-    <div class='col-sm-6 col-sm-offset-3'>
-        <h2>Hatchlings</h2>
         {% for hatchling in hatchlings %}
+        <div class='col-sm-4 col-sm-offset-3'>
             {% with rancho=hatchling %}
                 {% include 'partials/rancho_card.html' %}
             {% endwith %}
+        </div>
         {% endfor %}
-    </div>
 </div>
 
 {% endblock %}
