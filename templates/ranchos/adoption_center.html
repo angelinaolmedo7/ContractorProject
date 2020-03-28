@@ -4,8 +4,8 @@
 <h1>Welcome to the RanchoStop Adoption Center</h1>
 <p>You have: ¢{{ user_crikits }}</p>
 <div class='row'>
-    <div class='col-sm-6 col-sm-offset-3'>
-        {% for rancho in ranchos_list %}
+    {% for rancho in ranchos_list %}
+        <div class='col-sm-4 col-sm-offset-3'>
             <form method='POST' action='/ranchos/new'>
                 <input type='hidden' name='species' value='{{ rancho.species }}'/>
                 <input type='hidden' name='sex' value='{{ rancho.sex }}'/>
@@ -21,7 +21,7 @@
                 </div>
             </form>
             <hr class="my-4">
-        {% endfor %}
-    </div>
+        </div>
+    {% endfor %}
 </div>
 {% endblock %}
